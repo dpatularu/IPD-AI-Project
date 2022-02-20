@@ -1,6 +1,6 @@
 
 import random
-from NPlayer import Player, initializePlayers
+from Player import Player, initializePlayers
 from Generators import *
 
 def playPrisonersDillema(p1:Player, p2:Player, rounds:int)->tuple:
@@ -37,12 +37,13 @@ def playPrisonersDillema(p1:Player, p2:Player, rounds:int)->tuple:
 
 def main ():
     random.seed()
-    p1 = Player(CD_Generator.random(16), CD_Generator.random(2))
-    p2 = Player(CD_Generator.random(16), CD_Generator.random(2))
+    # Strategy and Initial Moves default to random
+    p1 = Player(2, CD_Generator.all_cooperate)
+    p2 = Player(2, initMoves=CD_Generator.all_defect)
     initializePlayers(p1, p2)
     (p1s, p2s) = playPrisonersDillema(p1, p2, 1000)
-    print("Player 1 strat:", p1.strategy)
-    print("Player 2 strat:", p2.strategy)
+    print("Player 1 ID:", p1.strategy, p1.initMoves)
+    print("Player 2 ID:", p2.strategy, p2.initMoves)
     print("Player 1 score:", p1.score)
     print("Player 2 score:", p2.score)
     return

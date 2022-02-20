@@ -1,118 +1,96 @@
 
+from mimetypes import init
 import random
+from typing import Callable, Union
+from Generators import CD_Generator
 
-random.seed()
+
 
 class Player:
+    outcomes :dict = { v:k for k,v in enumerate("RTSP") } # factors as dictionary
+    nodeSize :int = len(outcomes)
 
-    memDepth :int = 1
-    capacity :int = 4 ** memDepth
+    def __init__ (self, memDepth :int,
+    strat :Union[str,Callable[[int],str]] = CD_Generator.random,
+    initMoves :Union[str,Callable[[int],str]] = CD_Generator.random):
+        """Creates a new player with the given memory depth, strategy,
+        and initial moves.
 
-    def __init__(self, strat:str):
-        self.strategy :str = strat
-        self.opHistory :str = Player.initialState()
+        Remember to initialize the player before playing the game.
+        Use the initializePlayers function in this module.
+        
+        Parameters
+        ----------
+        `memDepth` : int
+            The memory depth of this player, or, the number of rounds they will remember
+        `strat` : str  |  (int) -> str
+            The strategy of this player, can be a str of length `memDepth` or a function
+        that takes an int and returns a string.
+        `initMoves` : str | (int) -> str
+            The initial moves this player will use to prepopulate the history.
+        Can be a string or a function that takes an int and returns a string.
+        """
+        self.memDepth = memDepth
+        self.stratSize = self.nodeSize ** self.memDepth
+        # Initialize initial moves
+        if isinstance(initMoves, str):
+            self.initMoves :str = initMoves
+        else:
+            self.initMoves :str = initMoves(self.memDepth)
+        assert len(self.initMoves) == self.memDepth, "Length of initial moves must equal memory depth"
+        self.curState :str = "." * self.memDepth # Starts empty, needs initializing
+        # Initialize strategy
+        if isinstance(strat, str):
+            self.strategy :str = strat
+        else:
+            self.strategy :str = strat(self.stratSize)
+        # Can also check if strategy is valid (consists only of letters from `factors`)
+        assert self.stratSize == len(self.strategy), "Length of strategy string must equal nodeSize^memDepth"
         self.score :int = 0 # Player wants to maximize this
-        assert(len(self.opHistory) == Player.memDepth)
-        assert(Player.capacity == len(self.strategy))
-
-    def initialState () -> str:
-        """Return an initial state for when the history is empty"""
-        return "R" * Player.memDepth
 
     def encodeHistory (self)->int:
-        """Encodes the current opponent history:str into an int from [0,4^memDepth)"""
-        roundEncodings = { "R": 0,"T": 1,"S": 2,"P": 3 }
+        """Encodes the current state into an int from [0,`stratSize`)"""
         result :int = 0
-        for i in range(Player.memDepth):
-            result += roundEncodings[self.opHistory[i]] * 4**(Player.memDepth - 1 - i)
-        return result
+        step : int = self.stratSize / self.nodeSize # Value of last 'bit'
+        for i in range(self.memDepth):
+            result += step * self.outcomes[self.curState[i]]
+            step /= self.nodeSize
+        return int(result)
 
     def getMove (self)->str:
         """Returns whether this player would C or D for the current history and strategy"""
+        if self.curState[0]=='.':
+            print("Error, player was not itialized yet!")
+            exit(-1)
         return self.strategy[self.encodeHistory()]
     
-    def pushMove (self, move:str):
-        """Updates the history with the oponents `move`"""
-        self.opHistory = self.opHistory[1:] + move
-    
-    def gen_strat_rand ()->str:
-        """Generates a random strat"""
-        result : str = ""
-        for i in range(Player.capacity):
-            result += 'D' if random.random() >= 0.5 else 'C'
-        return result    
+    def updateHistory (self, outcome:str):
+        """Updates the history with the oponents `newState`"""
+        self.curState = self.curState[1:] + outcome
 
-def playPrisonersDillema(p1:Player, p2:Player, rounds:int)->tuple:
-    """Players `r` rounds of the game with players `p1` and `p2`.  
-        Returns the resulting score (p1Score, p2Score)"""
-    outcomes = { "CC": "R","DC": "T","CD": "S","DD": "P" }
-    for r in range(rounds):
-        roundOutcome = p1.getMove() + p2.getMove()
-        result = outcomes[roundOutcome]
-        if result == "R":
-            p1.score += 3
-            p2.score += 3
-            p1.pushMove("R")
-            p2.pushMove("R")
-        elif result == "T":
-            p1.score += 5
-            p2.score += 0
-            p1.pushMove("T")
-            p2.pushMove("S")
-        elif result == "S":
-            p1.score += 0
-            p2.score += 5
-            p1.pushMove("S")
-            p2.pushMove("T")
-        elif result == "P":
-            p1.score += 1
-            p2.score += 1
-            p1.pushMove("P")
-            p2.pushMove("P")
+
+
+def initializePlayers (p1:Player, p2:Player):
+    """Prepopulate the history of both given players using their initial moves"""
+    p1M = len(p1.initMoves)
+    p2M = len(p2.initMoves)
+    M = max(p1M, p2M)
+    for m in range(M):
+        p1m = p1.initMoves[m] if m < p1M else p1.getMove()
+        p2m = p2.initMoves[m] if m < p2M else p2.getMove()
+        result = p1m + p2m
+        if result == "CC":
+            p1.updateHistory("R")
+            p2.updateHistory("R")
+        elif result == "DC":
+            p1.updateHistory("T")
+            p2.updateHistory("S")
+        elif result == "CD":
+            p1.updateHistory("S")
+            p2.updateHistory("T")
+        elif result == "DD":
+            p1.updateHistory("P")
+            p2.updateHistory("P")
         else:
             print("Error, invalid move")
             exit(-1)
-    return (p1.score, p2.score)
-
-def main ():
-    p1 = Player("DDDD")
-    p2 = Player("DDDD")
-    (p1s, p2s) = playPrisonersDillema(p1, p2, 3)
-    print("Player 1 strat:", p1.strategy)
-    print("Player 2 strat:", p2.strategy)
-    print("Player 1 score:", p1.score)
-    print("Player 2 score:", p2.score)
-    return
-
-if __name__=="__main__": main()
-
-"""
-function HILL_CLIMBING (problem) returns `state that is a local maxiumum`
-input: `problem` (a problem)
-local variables:`current` (a node)
-                `neighbor` (a node)
-
-current <-- MAKE_NODE (INITIAL_STATE[problem])
-loop do
-    neighbor <-- a highest valued successor of current
-    if VALUE[neighbor] <= VALUE[current] then return STATE[current]
-    current <-- neighbor
-"""
-# TABU: Keep fixed length queue of previously visited notes (tabu list)
-
-"""
-function SIMULATED_ANNEALING (problem, schedule) returns `solution state`
-input: `problem` (a problem)
-local vars: `current` (a node)
-            `next` (a node)
-            `T` (a 'temperature' controlling the prob. of downward steps)
-
-current <-- MAKE_NODE(INITIAL_STATE[problem])
-for t <-- 1 to infinity do
-    T <-- schedule[t]
-    if T==0 then return current
-    next <-- randomly selected successor of current
-    dE <-- VALUE[next] - VALUE[current]
-    if dE > 0 then current <-- next
-    else current <-- next only with probability exp(dE/T)
-"""
