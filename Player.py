@@ -3,28 +3,29 @@ import random
 
 random.seed()
 
+
 class Player:
-    memDepth :int = 6
-    capacity :int = 2 ** memDepth
+
+    memDepth :int = 1
+    capacity :int = 4 ** memDepth
 
     def __init__(self, strat:str):
         self.strategy :str = strat
         self.opHistory :str = Player.initialState()
-        self.jailTime :int = 0 # Player wants to minimize this
+        self.score :int = 0 # Player wants to maximize this
         assert(len(self.opHistory) == Player.memDepth)
         assert(Player.capacity == len(self.strategy))
 
     def initialState () -> str:
         """Return an initial state for when the history is empty"""
-        return "C" * Player.memDepth
+        return "R" * Player.memDepth
 
     def encodeHistory (self)->int:
-        """Encodes the current opponent history:str into an int from [0,2^memDepth)"""
+        """Encodes the current opponent history:str into an int from [0,4^memDepth)"""
+        roundEncodings = { "R": 0,"T": 1,"S": 2,"P": 3 }
         result :int = 0
-        l :int = Player.memDepth - 1
         for i in range(Player.memDepth):
-            if self.opHistory[l-i]=="D":
-                result += 2**i
+            result += roundEncodings[self.opHistory[i]] * 4**(Player.memDepth - 1 - i)
         return result
 
     def getMove (self)->str:
@@ -45,37 +46,43 @@ class Player:
 def playPrisonersDillema(p1:Player, p2:Player, rounds:int)->tuple:
     """Players `r` rounds of the game with players `p1` and `p2`.  
         Returns the resulting score (p1Score, p2Score)"""
+    outcomes = { "CC": "R","DC": "T","CD": "S","DD": "P" }
     for r in range(rounds):
-        p1m = p1.getMove()
-        p2m = p2.getMove()
-        result = p1m + p2m
-        if result == "CC":
-            p1.jailTime += 1
-            p2.jailTime += 1
-        elif result == "CD":
-            p1.jailTime += 20
-            # p2 += 0
-        elif result == "DC":
-            # p1 += 0
-            p2.jailTime += 20
-        elif result == "DD":
-            p1.jailTime += 10
-            p2.jailTime += 10
+        roundOutcome = p1.getMove() + p2.getMove()
+        result = outcomes[roundOutcome]
+        if result == "R":
+            p1.score += 1
+            p2.score += 1
+            p1.pushMove("R")
+            p2.pushMove("R")
+        elif result == "T":
+            p1.score += 20
+            p2.score += 0
+            p1.pushMove("T")
+            p2.pushMove("S")
+        elif result == "S":
+            p1.score += 0
+            p2.score += 20
+            p1.pushMove("S")
+            p2.pushMove("T")
+        elif result == "P":
+            p1.score += 10
+            p2.score += 10
+            p1.pushMove("P")
+            p2.pushMove("P")
         else:
             print("Error, invalid move")
             exit(-1)
-        p1.pushMove(p2m)
-        p2.pushMove(p1m)
-    return (p1.jailTime, p2.jailTime)
+    return (p1.score, p2.score)
 
 def main ():
-    p1 = Player(Player.gen_strat_rand())
-    p2 = Player(Player.gen_strat_rand())
-    (p1s, p2s) = playPrisonersDillema(p1, p2, 1000000)
+    p1 = Player("DDDD")
+    p2 = Player("DDDD")
+    (p1s, p2s) = playPrisonersDillema(p1, p2, 3)
     print("Player 1 strat:", p1.strategy)
     print("Player 2 strat:", p2.strategy)
-    print("Player 1 score:", p1s)
-    print("Player 2 score:", p2s)
+    print("Player 1 score:", p1.score)
+    print("Player 2 score:", p2.score)
     return
 
 if __name__=="__main__": main()
