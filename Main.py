@@ -7,6 +7,7 @@ def playPrisonersDillema(p1:Player, p2:Player, rounds:int)->tuple:
     """Players `r` rounds of the game with players `p1` and `p2`.  
         Returns the resulting score (p1Score, p2Score)"""
     outcomes = { "CC": "R","DC": "T","CD": "S","DD": "P" }
+    initializePlayers(p1, p2)
     for r in range(rounds):
         roundOutcome = p1.getMove() + p2.getMove()
         result = outcomes[roundOutcome]
@@ -40,7 +41,6 @@ def main ():
     # Strategy and Initial Moves default to random
     p1 = Player(2, CD_Generator.all_cooperate)
     p2 = Player(2, initMoves=CD_Generator.all_defect)
-    initializePlayers(p1, p2)
     (p1s, p2s) = playPrisonersDillema(p1, p2, 1000)
     print("Player 1 ID:", p1.strategy, p1.initMoves)
     print("Player 2 ID:", p2.strategy, p2.initMoves)
