@@ -34,43 +34,24 @@ def generateRandomStrategies(memDepth: int, base: int, n: int) -> [(str, str)]:
     return result
 
 
-# def fitness(p1: Player, players: [Player]) -> int:
-#     """plays a strategy against all members in a given list and returns
-#     the total score"""
-#     NUM_ROUNDS = 64  # the number of rounds p1 plays against each opponent
-#     score = 0
-
-#     for player in players:
-#         (p1s, p2s) = playPrisonersDillema(p1, player, NUM_ROUNDS)
-#         score += p1s
-
-#     return score
-
-
-def genPercentFitness(strats: [(str, str)]) -> [float]:
+def fitness(strats: [(str, str)]) -> [float]:
     """takes a list of strategy tuples and returns the percentage fitness value for each"""
-    # players = []
-    # for strat in strats:
-    #     players.append(Player(len(strat[1]), strat[0], strat[1]))
+    NUM_ROUNDS = 64     # the number of consecutive rounds each strategy plays against every other strategy
 
-    NUM_ROUNDS = 64
     total = 0
-    fitnessLst = []
-    for i in range(len(strats)):
+    fitnessLst = [0.0] * len(strats)
+    for i in range(len(strats) - 1):
         (memDepth, strat, initMoves) = len(strats[i][1]), strats[i][0], strats[i][1]
-        fitnessScore = 0
         testSubject = Player(memDepth, strat, initMoves)
-        for j in range(len(strats)):
-            if i == j: 
-                break
+        for j in range(i + 1, len(strats)):
             competition = Player(len(strats[j][1]), strats[j][0], strats[j][1])
             (p1s, p2s) = playPrisonersDillema(testSubject, competition, NUM_ROUNDS)
-            fitnessScore += p1s
-            total += p1s
-        fitnessLst.append(fitnessScore)
+            fitnessLst[i] += p1s
+            fitnessLst[j] += p2s
+            total += p1s + p2s
 
     for i in range(len(fitnessLst)):
-        fitnessLst[i] = fitnessLst[i] / float(total)
+        fitnessLst[i] /= float(total)
 
     return fitnessLst
 
@@ -103,7 +84,7 @@ def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, gen
     `nodeSize` : int
         The base value for encoding a strategy. Either 2 if {CD} or 4 if {RTSP}
     `popSize` : int
-        The size of each generation. Must be even to allow for valid crossover pairings.
+        The size of the population. Must be even to allow for valid crossover pairings.
     `mutationRate` : float
         The probability that a strategy will mutate
     `generations` : int
@@ -112,7 +93,7 @@ def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, gen
     Returns
     -------
     `strategy` : (str, str)
-        A tuple containing the strategy encoding  and the initial moves for the highest
+        A tuple containing the strategy encoding and the initial moves for the highest
         performing strategy after all generations
     """
     assert popSize % 2 == 0
@@ -124,10 +105,11 @@ def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, gen
         print("Generation:", g + 1, "/", generations)
 
         # sort the population by fitness
-        fitnessLst = genPercentFitness(stratLst)
+        fitnessLst = fitness(stratLst)
         fitnessLst, stratLst = zip(*sorted(zip(fitnessLst, stratLst)))
 
         # select a new population with each strategy having a probability
+        # proportional to its fitness
         newStratLst: (str, str) = []
         for i in range(len(stratLst)):
             newStratLst.append(selectStrategy(fitnessLst, stratLst))
@@ -143,13 +125,16 @@ def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, gen
 
         # mutate the population
         for i in range(len(stratLst)):
+            # chance to mutate strategy
             rand = random.random()
             if rand < mutationRate:
                 stratLst[i] = (mutate(stratLst[i][0]), stratLst[i][1])
-            elif rand < mutationRate * 2:
+            # chance to mutate initial moves independent of strategy
+            rand = random.random()
+            if rand < mutationRate:
                 stratLst[i] = (stratLst[i][0], mutate(stratLst[i][1]))
 
     # evaluate and return the highest performing strategy
-    fitnessLst = genPercentFitness(stratLst)
+    fitnessLst = fitness(stratLst)
     fitnessLst, stratLst = zip(*sorted(zip(fitnessLst, stratLst)))
     return stratLst[-1]
