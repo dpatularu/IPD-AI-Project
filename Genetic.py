@@ -34,31 +34,38 @@ def generateRandomStrategies(memDepth: int, base: int, n: int) -> [(str, str)]:
     return result
 
 
-def fitness(p1: Player, players: [Player]) -> int:
-    """plays a strategy against all members in a given list and returns
-    the total score"""
-    NUM_ROUNDS = 64  # the number of rounds p1 plays against each opponent
-    score = 0
+# def fitness(p1: Player, players: [Player]) -> int:
+#     """plays a strategy against all members in a given list and returns
+#     the total score"""
+#     NUM_ROUNDS = 64  # the number of rounds p1 plays against each opponent
+#     score = 0
 
-    for player in players:
-        (p1s, p2s) = playPrisonersDillema(p1, player, NUM_ROUNDS)
-        score += p1s
+#     for player in players:
+#         (p1s, p2s) = playPrisonersDillema(p1, player, NUM_ROUNDS)
+#         score += p1s
 
-    return score
+#     return score
 
 
 def genPercentFitness(strats: [(str, str)]) -> [float]:
     """takes a list of strategy tuples and returns the percentage fitness value for each"""
-    players = []
-    for strat in strats:
-        players.append(Player(len(strat[1]), strat[0], strat[1]))
+    # players = []
+    # for strat in strats:
+    #     players.append(Player(len(strat[1]), strat[0], strat[1]))
 
+    NUM_ROUNDS = 64
     total = 0
     fitnessLst = []
-    for i in range(len(players)):
-        f = fitness(players[i], players[:i] + players[i + 1:])
-        total += f
-        fitnessLst.append(f)
+    for i in range(len(strats)):
+        (memDepth, strat, initMoves) = len(strats[i][1]), strats[i][0], strats[i][1]
+        fitnessScore = 0
+        testSubject = Player(memDepth, strat, initMoves)
+        for j in range(i+1, len(strats)):
+            competition = Player(len(strats[j][1]), strats[j][0], strats[j][1])
+            (p1s, p2s) = playPrisonersDillema(testSubject, competition, NUM_ROUNDS)
+            fitnessScore += p1s
+            total += p1s
+        fitnessLst.append(fitnessScore)
 
     for i in range(len(fitnessLst)):
         fitnessLst[i] = fitnessLst[i] / float(total)
