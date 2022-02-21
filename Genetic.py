@@ -60,7 +60,9 @@ def genPercentFitness(strats: [(str, str)]) -> [float]:
         (memDepth, strat, initMoves) = len(strats[i][1]), strats[i][0], strats[i][1]
         fitnessScore = 0
         testSubject = Player(memDepth, strat, initMoves)
-        for j in range(i+1, len(strats)):
+        for j in range(len(strats)):
+            if i == j: 
+                break
             competition = Player(len(strats[j][1]), strats[j][0], strats[j][1])
             (p1s, p2s) = playPrisonersDillema(testSubject, competition, NUM_ROUNDS)
             fitnessScore += p1s
