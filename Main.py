@@ -35,16 +35,31 @@ def playPrisonersDillema(p1:Player, p2:Player, rounds:int)->tuple:
             exit(-1)
     return (p1.score, p2.score)
 
+def play_against_everyone (p1:Player)->int:
+    rounds :int = 1000
+    totalScore :float = 0.0
+    m : int = p1.memDepth
+    p2k = 4**m + m # Length of UID
+    N = 2**p2k
+    for n in range(N):
+        p2id = CD_Generator.from_number(p2k, n)
+        p2 = Player(m, p2id[:-m], p2id[-m:])
+        (p1s, p2s) = playPrisonersDillema(p1, p2, rounds)
+        totalScore += p1s / rounds
+    return totalScore / N
+
+
+
 def main ():
     random.seed()
-    # Strategy and Initial Moves default to random
-    p1 = Player(2, CD_Generator.all_cooperate)
-    p2 = Player(2, initMoves=CD_Generator.all_defect)
-    (p1s, p2s) = playPrisonersDillema(p1, p2, 1000)
+    p1 = Player(1)
+    p1s = play_against_everyone(p1)
+    # p2 = Player(2)
+    # (p1s, p2s) = playPrisonersDillema(p1, p2, 1000)
     print("Player 1 ID:", p1.strategy, p1.initMoves)
-    print("Player 2 ID:", p2.strategy, p2.initMoves)
-    print("Player 1 score:", p1.score)
-    print("Player 2 score:", p2.score)
+    # print("Player 2 ID:", p2.strategy, p2.initMoves)
+    print("Player 1 ave score:", p1s)
+    # print("Player 2 ave score:", p2.score / 1000)
     return
 
 if __name__=="__main__": main()

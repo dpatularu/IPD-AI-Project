@@ -11,8 +11,8 @@ class Player:
     nodeSize :int = len(outcomes)
 
     def __init__ (self, memDepth :int,
-    strat :Union[str,Callable[[int],str]] = CD_Generator.random,
-    initMoves :Union[str,Callable[[int],str]] = CD_Generator.random):
+    strat :str|Callable[[int],str]|int = CD_Generator.random,
+    initMoves :str|Callable[[int],str]|int = CD_Generator.random):
         """Creates a new player with the given memory depth, strategy,
         and initial moves.
 
@@ -32,29 +32,37 @@ class Player:
         """
         self.memDepth = memDepth
         self.stratSize = self.nodeSize ** self.memDepth
+        self.initMoves = self.__parse_arg__(initMoves)
         # Initialize initial moves
         if isinstance(initMoves, str):
             self.initMoves :str = initMoves
-        else:
+        elif isinstance(initMoves, int):
+            self.initMoves :str = CD_Generator.from_number(self.memDepth, initMoves)
+        else: # Assumed to be a callable (int) -> str
             self.initMoves :str = initMoves(self.memDepth)
         assert len(self.initMoves) == self.memDepth, "Length of initial moves must equal memory depth"
         self.curState :str = "." * self.memDepth # Starts empty, needs initializing
-        # Initialize strategy
+        self.strategy = self.__parse_arg__(strat)
         if isinstance(strat, str):
             self.strategy :str = strat
-        else:
+        elif isinstance(strat, int):
+            self.strategy :str = CD_Generator.from_number(self.memDepth, strat)
+        else: # Assumed to be a callable (int) -> str
             self.strategy :str = strat(self.stratSize)
-        # Can also check if strategy is valid (consists only of letters from `factors`)
         assert self.stratSize == len(self.strategy), "Length of strategy string must equal nodeSize^memDepth"
         self.score :int = 0 # Player wants to maximize this
+
+    def __parse_arg__ (self, arg:str|Callable[[int],str]|int)->str:
+        """Internal method. Parses a given argument initializing the strategy or initial moves"""
+        
 
     def encodeHistory (self)->int:
         """Encodes the current state into an int from [0,`stratSize`)"""
         result :int = 0
-        step : int = self.stratSize / self.nodeSize # Value of last 'bit'
+        step : int = self.stratSize // self.nodeSize # Value of last 'bit'
         for i in range(self.memDepth):
             result += step * self.outcomes[self.curState[i]]
-            step /= self.nodeSize
+            step //= self.nodeSize
         return int(result)
 
     def getMove (self)->str:
@@ -72,6 +80,8 @@ class Player:
 
 def initializePlayers (p1:Player, p2:Player):
     """Prepopulate the history of both given players using their initial moves"""
+    p1.score = 0
+    p2.score = 0
     p1M = len(p1.initMoves)
     p2M = len(p2.initMoves)
     M = max(p1M, p2M)
