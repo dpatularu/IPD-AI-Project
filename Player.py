@@ -32,7 +32,6 @@ class Player:
         """
         self.memDepth = memDepth
         self.stratSize = self.nodeSize ** self.memDepth
-        self.initMoves = self.__parse_arg__(initMoves)
         # Initialize initial moves
         if isinstance(initMoves, str):
             self.initMoves :str = initMoves
@@ -42,7 +41,6 @@ class Player:
             self.initMoves :str = initMoves(self.memDepth)
         assert len(self.initMoves) == self.memDepth, "Length of initial moves must equal memory depth"
         self.curState :str = "." * self.memDepth # Starts empty, needs initializing
-        self.strategy = self.__parse_arg__(strat)
         if isinstance(strat, str):
             self.strategy :str = strat
         elif isinstance(strat, int):
@@ -51,10 +49,7 @@ class Player:
             self.strategy :str = strat(self.stratSize)
         assert self.stratSize == len(self.strategy), "Length of strategy string must equal nodeSize^memDepth"
         self.score :int = 0 # Player wants to maximize this
-
-    def __parse_arg__ (self, arg:str|Callable[[int],str]|int)->str:
-        """Internal method. Parses a given argument initializing the strategy or initial moves"""
-        
+  
 
     def encodeHistory (self)->int:
         """Encodes the current state into an int from [0,`stratSize`)"""
