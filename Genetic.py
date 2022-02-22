@@ -49,6 +49,7 @@ def fitness(strats: [(str, str)]) -> [float]:
             fitnessLst[i] += p1s
             fitnessLst[j] += p2s
             total += p1s + p2s
+            testSubject.score = 0
 
     for i in range(len(fitnessLst)):
         fitnessLst[i] /= float(total)
