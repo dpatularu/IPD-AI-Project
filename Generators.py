@@ -1,7 +1,6 @@
 """Contains factory classes for generating sequences such as
 randomized Cs or Ds, or all Ts, for example"""
 
-from asyncio import streams
 import random
 
 
@@ -24,18 +23,6 @@ class CD_Generator:
     def all_defect (k:int)->str:
         """String of length `k` of all `D`s"""
         return "D" * k
-    
-    @staticmethod
-    def from_number (k:int, n:int)->str:
-        """String of length `k` decoded from the number `n`"""
-        result = bytearray("C"*k, "ASCII")
-        step :int = 1
-        for i in range(k-1,-1,-1):
-            if n & step:
-                result[i]+=1
-            step <<= 1
-        return str(result, "ASCII")
-
 
 
 class RTSP_Generator:
