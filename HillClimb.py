@@ -2,9 +2,11 @@ from Player import Player, initializePlayers
 from Generators import *
 from Play import playPrisonersDillema
 
+NUM_ROUNDS = 64
+
 
 def generateRandomStrategies(memDepth: int, nodeSize: int, n: int) -> [(str, str)]:
-    """Generates n random strategies with given memory depth and node size."""
+    """ Generates n random strategies with given memory depth and node size."""
     assert nodeSize == 2 or nodeSize == 4
 
     result: [(str, str)] = []
@@ -38,9 +40,7 @@ def getSuccessors(strat: (str, str)) -> [(str, str)]:
 
 
 def fitness(strats: [(str, str)]) -> [int]:
-    """takes a list of strategy tuples and returns the percentage fitness value for each"""
-    NUM_ROUNDS = 64     # the number of consecutive rounds each strategy plays against every other strategy
-
+    """ Takes a list of strategy tuples and returns the percentage fitness value for each"""
     total = 0
     fitnessLst = [0] * len(strats)
     for i in range(len(strats) - 1):
@@ -58,21 +58,35 @@ def fitness(strats: [(str, str)]) -> [int]:
 
 
 def titfortatHeuristic(strats: [(str, str)]) -> [int]:
+    """TODO"""
     titfortat = Player(1, "CCDD", "C")
-    NUM_ROUNDS = 64
     scoreLst = list()
     for strat in strats:
         competitor = Player(len(strat[1]), strat[0], strat[1])
         (p1s, p2s) = playPrisonersDillema(competitor, titfortat, NUM_ROUNDS)
         scoreLst.append(p1s)
+        titfortat.score = 0
     return scoreLst
 
+
+def heuristicA(stat: (str, str), opponents: [(str, str)]):
+    """TODO"""
+    player = Player(len(stat[1]), stat[0], stat[1])
+    totalScore = 0
+    for opponent in opponents:
+        opPlayer = Player(len(opponent[1]), opponent[0], opponent[1])
+        (p1s, p2s) = playPrisonersDillema(player, opPlayer, NUM_ROUNDS)
+        totalScore += p1s
+        player.score = 0
+    return totalScore
+
+
 def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
-    # note two different ways to implement comparisons
-    # either compare against previous iteration's hiscore, or this iteration's highest score
-    # comparing against the current iterations high score gives a more meaningful result,
-    # but results in occasional infinite loops TODO
+    """TODO"""
     print("----Hill Climbing----")
+    NUM_OPPONENTS = 50
+
+    opponents = generateRandomStrategies(memDepth, nodeSize, NUM_OPPONENTS)
 
     topStrat = generateRandomStrategies(memDepth, nodeSize, 1)[0]
     topStratScore = 0
@@ -98,6 +112,7 @@ def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
             return topStrat
         topStrat = stratLst[-1]
         topStratScore = scoreLst[-1]
+
 
         #To prevent infinite loops
         if topStrat in previousTopStrats:
