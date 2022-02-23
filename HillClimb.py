@@ -57,15 +57,15 @@ def fitness(strats: [(str, str)]) -> [int]:
     return fitnessLst
 
 
-def titfortatHeuristic(strats: [(str, str)]) -> [int]:
-    """TODO"""
-    titfortat = Player(1, "CCDD", "C")
+def heuristicB(standardStrat: (str, str), strats: [(str, str)]) -> [int]:
+    """Receives one standard strategy that an array of strategies will play against. Returns a list of scores."""
+    standardPlayer = Player(len(standardStrat[1]), standardStrat[0], standardStrat[1])
     scoreLst = list()
     for strat in strats:
         competitor = Player(len(strat[1]), strat[0], strat[1])
-        (p1s, p2s) = playPrisonersDillema(competitor, titfortat, NUM_ROUNDS)
+        (p1s, p2s) = playPrisonersDillema(competitor, standardPlayer, NUM_ROUNDS)
         scoreLst.append(p1s)
-        titfortat.score = 0
+        standardPlayer.score = 0
     return scoreLst
 
 
