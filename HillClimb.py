@@ -58,7 +58,8 @@ def fitness(strats: [(str, str)]) -> [int]:
 
 
 def heuristicB(standardStrat: (str, str), strats: [(str, str)]) -> [int]:
-    """Receives one standard strategy that an array of strategies will play against. Returns a list of scores."""
+    """ Receives one standard strategy that an array of strategies will play against.
+        Returns a list of scores. """
     standardPlayer = Player(len(standardStrat[1]), standardStrat[0], standardStrat[1])
     scoreLst = list()
     for strat in strats:
@@ -69,16 +70,22 @@ def heuristicB(standardStrat: (str, str), strats: [(str, str)]) -> [int]:
     return scoreLst
 
 
-def heuristicA(stat: (str, str), opponents: [(str, str)]):
-    """TODO"""
-    player = Player(len(stat[1]), stat[0], stat[1])
-    totalScore = 0
-    for opponent in opponents:
-        opPlayer = Player(len(opponent[1]), opponent[0], opponent[1])
-        (p1s, p2s) = playPrisonersDillema(player, opPlayer, NUM_ROUNDS)
-        totalScore += p1s
-        player.score = 0
-    return totalScore
+def heuristicA(strats: [(str, str)], opponents: [(str, str)]) -> [int]:
+    """ Takes a list of strategies and plays them against a list of opponents. Returns
+        the resulting list of scores. """
+    heuristicLst = []
+
+    for i in range(len(strats)):
+        (memDepth, strat, initMoves) = len(strats[i][1]), strats[i][0], strats[i][1]
+        player = Player(memDepth, strat, initMoves)
+        playerScore = 0
+        for j in range(len(opponents)):
+            opponent = Player(len(strats[j][1]), strats[j][0], strats[j][1])
+            (p1s, p2s) = playPrisonersDillema(player, opponent, NUM_ROUNDS)
+            playerScore += p1s
+        heuristicLst.append(playerScore)
+
+    return heuristicLst
 
 
 def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
@@ -89,6 +96,7 @@ def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
     opponents = generateRandomStrategies(memDepth, nodeSize, NUM_OPPONENTS)
 
     topStrat = generateRandomStrategies(memDepth, nodeSize, 1)[0]
+    print("initial string:", topStrat)
     topStratScore = 0
     previousTopStrats = dict()
 
@@ -101,7 +109,7 @@ def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
         successors.append(topStrat)
 
         # calculate the fitness value for each successor and the top strategy
-        scoreLst = titfortatHeuristic(successors)
+        scoreLst = heuristicB(("CCDD", "C"), successors)
         topStratScore = scoreLst[-1]    # compare against topStrat's score from this iteration
         scoreLst, stratLst = zip(*sorted(zip(scoreLst, successors)))
 
@@ -113,8 +121,7 @@ def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
         topStrat = stratLst[-1]
         topStratScore = scoreLst[-1]
 
-
-        #To prevent infinite loops
+        # to prevent infinite loops
         if topStrat in previousTopStrats:
             return topStrat
 
