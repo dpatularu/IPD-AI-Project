@@ -3,6 +3,7 @@ from Player import Player, initializePlayers
 from Generators import *
 from Play import playPrisonersDillema
 from Genetic import genetic
+from HillClimb import hillClimb
 
 
 def main():
@@ -13,9 +14,10 @@ def main():
     popSize = 100
     mutationRate = 0.001
     generations = 10
-    g = genetic(memDepth, nodeSize, popSize, mutationRate, generations)
+    # g = genetic(memDepth, nodeSize, popSize, mutationRate, generations)
+    h = hillClimb(memDepth, nodeSize)
 
-    p1 = Player(len(g[1]), g[0], g[1])
+    p1 = Player(len(h[1]), h[0], h[1])
     p2 = Player(3)  # Strategy and Initial Moves default to random
     (p1s, p2s) = playPrisonersDillema(p1, p2, 1000)
     # Strategy and Initial Moves default to random("Player 1 ID:", p1.strategy, p1.initMoves)
