@@ -66,6 +66,7 @@ def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
 
     topStrat = generateRandomStrategies(memDepth, nodeSize, 1)[0]
     topStratScore = 0
+    previousTopStrats = dict()
 
     i = 0
     while True:
@@ -87,5 +88,11 @@ def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
             return topStrat
         topStrat = stratLst[-1]
         topStratScore = scoreLst[-1]
+
+        #To prevent infinite loops
+        if topStrat in previousTopStrats:
+            return topStrat
+
+        previousTopStrats[topStrat] = topStratScore
 
         i += 1
