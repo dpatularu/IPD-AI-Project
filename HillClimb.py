@@ -57,6 +57,16 @@ def fitness(strats: [(str, str)]) -> [int]:
     return fitnessLst
 
 
+def titfortatHeuristic(strats: [(str, str)]) -> [int]:
+    titfortat = Player(1, "CCDD", "C")
+    NUM_ROUNDS = 64
+    scoreLst = list()
+    for strat in strats:
+        competitor = Player(len(strat[1]), strat[0], strat[1])
+        (p1s, p2s) = playPrisonersDillema(competitor, titfortat, NUM_ROUNDS)
+        scoreLst.append(p1s)
+    return scoreLst
+
 def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
     # note two different ways to implement comparisons
     # either compare against previous iteration's hiscore, or this iteration's highest score
@@ -77,7 +87,7 @@ def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
         successors.append(topStrat)
 
         # calculate the fitness value for each successor and the top strategy
-        scoreLst = fitness(successors)
+        scoreLst = titfortatHeuristic(successors)
         topStratScore = scoreLst[-1]    # compare against topStrat's score from this iteration
         scoreLst, stratLst = zip(*sorted(zip(scoreLst, successors)))
 
