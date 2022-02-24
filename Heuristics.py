@@ -4,6 +4,7 @@ from Play import playPrisonersDillema
 
 NUM_ROUNDS = 64
 
+
 def battleRoyale(strats: [(str, str)]) -> [int]:
     """ Takes a list of strategies that plays against each other. Returns the resulting list of scores"""
     total = 0
@@ -45,9 +46,10 @@ def manyVersusMany(strats: [(str, str)], opponents: [(str, str)]) -> [int]:
         player = Player(memDepth, strat, initMoves)
         playerScore = 0
         for j in range(len(opponents)):
-            opponent = Player(len(strats[j][1]), strats[j][0], strats[j][1])
+            opponent = Player(len(opponents[j][1]), opponents[j][0], opponents[j][1])
             (p1s, p2s) = playPrisonersDillema(player, opponent, NUM_ROUNDS)
             playerScore += p1s
+            player.score = 0
         heuristicLst.append(playerScore)
 
     return heuristicLst
