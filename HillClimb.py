@@ -39,8 +39,8 @@ def getSuccessors(strat: (str, str)) -> [(str, str)]:
     return successors
 
 
-def fitness(strats: [(str, str)]) -> [int]:
-    """ Takes a list of strategy tuples and returns the percentage fitness value for each"""
+def battleRoyale(strats: [(str, str)]) -> [int]:
+    """ Takes a list of strategies that plays against each other. Returns the resulting list of scores"""
     total = 0
     fitnessLst = [0] * len(strats)
     for i in range(len(strats) - 1):
@@ -57,9 +57,9 @@ def fitness(strats: [(str, str)]) -> [int]:
     return fitnessLst
 
 
-def heuristicB(standardStrat: (str, str), strats: [(str, str)]) -> [int]:
+def manyVersusOne(standardStrat: (str, str), strats: [(str, str)]) -> [int]:
     """ Receives one standard strategy that an array of strategies will play against.
-        Returns a list of scores. """
+        Returns the resulting list of scores. """
     standardPlayer = Player(len(standardStrat[1]), standardStrat[0], standardStrat[1])
     scoreLst = list()
     for strat in strats:
@@ -70,7 +70,7 @@ def heuristicB(standardStrat: (str, str), strats: [(str, str)]) -> [int]:
     return scoreLst
 
 
-def heuristicA(strats: [(str, str)], opponents: [(str, str)]) -> [int]:
+def manyVersusMany(strats: [(str, str)], opponents: [(str, str)]) -> [int]:
     """ Takes a list of strategies and plays them against a list of opponents. Returns
         the resulting list of scores. """
     heuristicLst = []
@@ -109,7 +109,7 @@ def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
         successors.append(topStrat)
 
         # calculate the fitness value for each successor and the top strategy
-        scoreLst = heuristicB(("CCDD", "C"), successors)
+        scoreLst = manyVersusOne(("CCDD", "C"), successors)
         topStratScore = scoreLst[-1]    # compare against topStrat's score from this iteration
         scoreLst, stratLst = zip(*sorted(zip(scoreLst, successors)))
 
