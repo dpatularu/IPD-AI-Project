@@ -45,9 +45,11 @@ def manyVersusMany(strats: [(str, str)], opponents: [(str, str)]) -> [int]:
         player = Player(memDepth, strat, initMoves)
         playerScore = 0
         for j in range(len(opponents)):
-            opponent = Player(len(strats[j][1]), strats[j][0], strats[j][1])
+            opponent = Player(len(opponents[j][1]), opponents[j][0], opponents[j][1])
             (p1s, p2s) = playPrisonersDillema(player, opponent, NUM_ROUNDS)
             playerScore += p1s
+            player.score = 0
         heuristicLst.append(playerScore)
 
     return heuristicLst
+

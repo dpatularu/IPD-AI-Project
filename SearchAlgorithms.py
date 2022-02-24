@@ -4,8 +4,6 @@ from Heuristics import *
 from random import *
 import math
 
-
-
 def generateRandomStrategies(memDepth: int, nodeSize: int, n: int) -> [(str, str)]:
     """ Generates n random strategies with given memory depth and node size."""
     assert nodeSize == 2 or nodeSize == 4
@@ -85,15 +83,17 @@ def simulatedAnnealing(memDepth: int, nodeSize: int) -> (str, str):
     """TODO"""
     print("----Simulated Annealing----")
     topStrat = generateRandomStrategies(memDepth, nodeSize, 1)[0]
+    NUM_OPPONENTS = 50
+    opponents = generateRandomStrategies(memDepth, nodeSize, NUM_OPPONENTS)
     print("initial string:", topStrat)
     topStratScore = 0
 
     temperature = 100
     i = 1
     while True:
-        print("\ti:", i, " | score:", topStratScore)
-        temperature = temperature/math.log(1+i, 2)
-        if temperature == 0: return topStrat
+        print("\ti:", i, " | strat:", topStrat, " | score:", topStratScore)
+        temperature = .95*temperature
+        if temperature < 10: return topStrat
 
         successors = getSuccessors(topStrat)
         successors.append(topStrat)
@@ -103,11 +103,12 @@ def simulatedAnnealing(memDepth: int, nodeSize: int) -> (str, str):
         nextIndex = randint(0, len(successors) - 2)
         delta = scoreLst[nextIndex] - topStratScore
 
-        probabilityRoll = random()
+        probabilityRoll = uniform(0, 1)
         epsilon = math.exp(delta/temperature)
-        if probabilityRoll < epsilon:
-                return topStrat
+        if delta > 0:
+            topStrat = successors[nextIndex]
+        else:
+             if probabilityRoll < epsilon:
+                topStrat = successors[nextIndex]
 
-        topStrat = successors[nextIndex]
         i += 1
-
