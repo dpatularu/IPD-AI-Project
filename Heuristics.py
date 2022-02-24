@@ -1,4 +1,4 @@
-from Player import Player, initializePlayers
+from Player import Player
 from Generators import *
 from Play import playPrisonersDillema
 

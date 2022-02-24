@@ -1,7 +1,8 @@
-from Player import Player, initializePlayers
+from Player import Player
 from Generators import *
-from Play import playPrisonersDillema
 from Heuristics import *
+from random import *
+import math
 
 
 
@@ -82,41 +83,31 @@ def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
 
 def simulatedAnnealing(memDepth: int, nodeSize: int) -> (str, str):
     """TODO"""
-    print("----Hill Climbing----")
-    NUM_OPPONENTS = 50
-
-    opponents = generateRandomStrategies(memDepth, nodeSize, NUM_OPPONENTS)
-
+    print("----Simulated Annealing----")
     topStrat = generateRandomStrategies(memDepth, nodeSize, 1)[0]
     print("initial string:", topStrat)
     topStratScore = 0
-    previousTopStrats = dict()
 
-    i = 0
+    temperature = 100
+    i = 1
     while True:
         print("\ti:", i, " | score:", topStratScore)
+        temperature = temperature/math.log(1+i, 2)
+        if temperature == 0: return topStrat
 
-        # generate successors for our highest performing strategy
         successors = getSuccessors(topStrat)
         successors.append(topStrat)
-
-        # calculate the fitness value for each successor and the top strategy
         scoreLst = manyVersusOne(("CCDD", "C"), successors)
-        topStratScore = scoreLst[-1]    # compare against topStrat's score from this iteration
-        scoreLst, stratLst = zip(*sorted(zip(scoreLst, successors)))
+        topStratScore = scoreLst[-1]   
 
-        print(scoreLst)
+        nextIndex = randint(0, len(successors) - 2)
+        delta = scoreLst[nextIndex] - topStratScore
 
-        # compare the fitness of the recently calculated top strategy against the previous one
-        if scoreLst[-1] <= topStratScore:
-            return topStrat
-        topStrat = stratLst[-1]
-        topStratScore = scoreLst[-1]
+        probabilityRoll = random()
+        epsilon = math.exp(delta/temperature)
+        if probabilityRoll < epsilon:
+                return topStrat
 
-        # to prevent infinite loops
-        if topStrat in previousTopStrats:
-            return topStrat
-
-        previousTopStrats[topStrat] = topStratScore
-
+        topStrat = successors[nextIndex]
         i += 1
+
