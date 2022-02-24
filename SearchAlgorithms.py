@@ -5,7 +5,6 @@ from random import *
 import math
 
 
-
 def generateRandomStrategies(memDepth: int, nodeSize: int, n: int) -> [(str, str)]:
     """ Generates n random strategies with given memory depth and node size."""
     assert nodeSize == 2 or nodeSize == 4
@@ -38,6 +37,51 @@ def getSuccessors(strat: (str, str)) -> [(str, str)]:
             successors.append((strat[0], strat[1][:i] + "C" + strat[1][i + 1:]))
 
     return successors
+
+
+def localBeam(memDepth: int, nodeSize: int, k: int) -> (str, str):
+    """TODO"""
+    print("----Local Beam----")
+    i = 0
+
+    # randomly generated opponents used for manyVsMany Heuristic
+    NUM_OPPONENTS = 10
+    opponents = generateRandomStrategies(memDepth, nodeSize, NUM_OPPONENTS)
+
+    stratLst = generateRandomStrategies(memDepth, nodeSize, k)
+
+    while True:
+        # finds the top performing strategy and its score
+        scoreLst = manyVersusMany(stratLst, opponents)
+        scoreLst, stratLst = zip(*sorted(zip(scoreLst, stratLst)))
+        topStrat = stratLst[-1]
+        topScore = scoreLst[-1]
+
+        print("\ti:", i)
+        print("\t\ttopScore:", topScore)
+
+        # finds all the successors from the list of strategies
+        successors: (str, str) = []
+        for strat in stratLst:
+            successors += getSuccessors(strat)
+        successors = list(dict.fromkeys(successors))    # removes duplicate entries (not tested yet TODO)
+
+        print("\t\tlen(stratLst):", len(stratLst), "  | len(successors):", len(successors))
+
+        # calculates the scores of all successors and sorts them by score
+        scoreLst = manyVersusMany(successors, opponents)
+        scoreLst, successors = zip(*sorted(zip(scoreLst, successors)))
+
+        print("\t\ttopSucScore:", scoreLst[-1])
+
+        # return highest preforming strat if no better strat is found in successors
+        if topScore >= scoreLst[-1]:
+            return topStrat
+
+        # repeat with the k highest performing successors
+        stratLst = successors[-k:]
+
+        i += 1
 
 
 def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
@@ -81,6 +125,7 @@ def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
 
         i += 1
 
+
 def simulatedAnnealing(memDepth: int, nodeSize: int) -> (str, str):
     """TODO"""
     print("----Simulated Annealing----")
@@ -92,8 +137,9 @@ def simulatedAnnealing(memDepth: int, nodeSize: int) -> (str, str):
     i = 1
     while True:
         print("\ti:", i, " | score:", topStratScore)
-        temperature = temperature/math.log(1+i, 2)
-        if temperature == 0: return topStrat
+        temperature = temperature / math.log(1 + i, 2)
+        if temperature == 0:
+            return topStrat
 
         successors = getSuccessors(topStrat)
         successors.append(topStrat)
@@ -106,7 +152,7 @@ def simulatedAnnealing(memDepth: int, nodeSize: int) -> (str, str):
         probabilityRoll = random()
         epsilon = math.exp(delta/temperature)
         if probabilityRoll < epsilon:
-                return topStrat
+            return topStrat
 
         topStrat = successors[nextIndex]
         i += 1
