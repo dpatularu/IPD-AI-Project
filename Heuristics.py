@@ -4,6 +4,7 @@ from Play import playPrisonersDillema
 
 NUM_ROUNDS = 64
 
+
 def battleRoyale(strats: [(str, str)]) -> [int]:
     """ Takes a list of strategies that plays against each other. Returns the resulting list of scores"""
     total = 0
