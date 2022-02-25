@@ -1,6 +1,5 @@
 
 import random
-from typing import Any
 
 
 class Dna:
@@ -58,14 +57,22 @@ class Dna:
     def __len__(self) -> int: return self.size
     def __str__(self) -> str: return Dna.decode(self.size, self.val)
     
-    def __op__(self, op, t):
-        """Performs given int operation like | & ^ %, witch LHS=self"""
+    
+    __default_sizing__ = [
+        lambda x,y : max(x.size, y.size),
+        lambda x,y : max(x.size, y.bit_length()),
+        lambda x,y : max(x.size, len(y))
+    ]
+    """Helper function for __op__, default function"""
+
+    def __op__(self, op, t, sizing=__default_sizing__):
+        """Performs the given integer operation like | & ^, with LHS=self"""
         if isinstance(t, Dna):
-            return Dna(op(self.val, t.val), max(self.size, t.size))
+            return Dna(op(self.val, t.val), sizing[0](self,t))
         elif isinstance(t, int):
-            return Dna(op(self.val, t), max(self.size, t.bit_length()))
+            return Dna(op(self.val, t), sizing[1](self,t))
         elif isinstance(t, str):
-            return Dna(op(self.val, Dna.encode(t)), max(self.size, len(t)))
+            return Dna(op(self.val, Dna.encode(t)), sizing[2](self,t))
         else: raise TypeError
 
     def __or__  (self, t): return self.__op__(int.__or__,   t)
@@ -74,8 +81,36 @@ class Dna:
     def __rand__(self, t): return self.__op__(int.__rand__, t)
     def __xor__ (self, t): return self.__op__(int.__xor__,  t)
     def __rxor__(self, t): return self.__op__(int.__rxor__, t)
-    def __mod__ (self, t): return self.__op__(int.__mod__,  t)
 
+    def __mod__ (self, t): return self.__op__(int.__mod__, t, [
+        lambda x,y : min(x.size, y.size),
+        lambda x,y : max(x.size, (y-1).bit_length()),
+        lambda x,y : max(x.size, len(y))
+    ])
+
+    def __lshift__(self, t): return self.__op__(int.__lshift__, t, [
+        lambda x,y : x.size + y.val,
+        lambda x,y : x.size + y,
+        lambda x,y : x.size + len(y)
+    ])
+
+    def __rshift__(self, t): return self.__op__(int.__rshift__, t, [
+        lambda x,y : x.size - y.val,
+        lambda x,y : x.size - y,
+        lambda x,y : x.size - len(y)
+    ])
+
+    def __bop__(self, op, t)->bool:
+        if   isinstance(t, Dna): return op(self.val, t.val)
+        elif isinstance(t, int): return op(self.val, t)
+        elif isinstance(t, str): return op(self.val, Dna.encode(t))
+        else: raise ValueError
+
+    def __lt__(self, t): return self.__bop__(int.__lt__, t)
+    def __le__(self, t): return self.__bop__(int.__le__, t)
+    def __gt__(self, t): return self.__bop__(int.__gt__, t)
+    def __ge__(self, t): return self.__bop__(int.__ge__, t)
+    
     def __invert__(self): return Dna(self.val ^ ((1<<self.size)-1), self.size)
  
     def __getitem__(self, i:int)->bool:
@@ -91,6 +126,12 @@ class Dna:
         elif isinstance(o, str):
             return str(self) == o
         return False
+    
+    def __ne__(self, o) -> bool:
+        return not self.__eq__(o)
+    
+    def __hash__(self) -> int:
+        return hash(str(self))
 
     @staticmethod
     def decode (size:int, n:int)->str:

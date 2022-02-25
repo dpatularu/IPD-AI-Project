@@ -1,50 +1,33 @@
 import random
+from typing import List
+from Dna import Dna
 from Play import playPrisonersDillema
 from Player import Player
-from Generators import *
-
-random.seed()
+from SearchAlgorithms import generateRandomStrategies
 
 
-def mutate(strat: str) -> str:
+def mutate(strat: Dna) -> Dna:
     """changes 1 random element in a given strategy"""
-    i = random.randint(0, len(strat) - 1)
-    if strat[i] == "C":
-        strat = strat[:i] + "D" + strat[i + 1:]
-    else:
-        strat = strat[:i] + "C" + strat[i + 1:]
-    return strat
+    return strat ^ (1 << random.randint(0, strat.size-1))
 
 
-def recombine(strat1: str, strat2: str) -> (str, str):
+def recombine(strat1: Dna, strat2: Dna) -> Dna:
     """crosses over two strategies"""
     assert len(strat1) == len(strat2)
     i = random.randint(1, len(strat1) - 1)
-    return strat1[:i] + strat2[i:], strat2[:i] + strat1[i:]
+    return str(strat1)[:i] + str(strat2)[i:], str(strat2)[:i] + str(strat1)[i:]
 
 
-def generateRandomStrategies(memDepth: int, base: int, n: int) -> [(str, str)]:
-    """generates n random strategies with given memory depth and node size"""
-    assert base == 2 or base == 4
-
-    result: [(str, str)] = []
-    for i in range(n):
-        result.append((CD_Generator.random(base ** memDepth), CD_Generator.random(memDepth)))
-
-    return result
-
-
-def fitness(strats: [(str, str)]) -> [float]:
+def fitness(strats: List[Dna]) -> List[float]:
     """takes a list of strategy tuples and returns the percentage fitness value for each"""
     NUM_ROUNDS = 64     # the number of consecutive rounds each strategy plays against every other strategy
 
     total = 0
     fitnessLst = [0.0] * len(strats)
     for i in range(len(strats) - 1):
-        (memDepth, strat, initMoves) = len(strats[i][1]), strats[i][0], strats[i][1]
-        testSubject = Player(memDepth, strat, initMoves)
+        testSubject = Player.from_dna(strats[i])
         for j in range(i + 1, len(strats)):
-            competition = Player(len(strats[j][1]), strats[j][0], strats[j][1])
+            competition = Player.from_dna(strats[j])
             (p1s, p2s) = playPrisonersDillema(testSubject, competition, NUM_ROUNDS)
             fitnessLst[i] += p1s
             fitnessLst[j] += p2s
@@ -57,7 +40,7 @@ def fitness(strats: [(str, str)]) -> [float]:
     return fitnessLst
 
 
-def selectStrategy(fitnessLst: [float], stratLst: [(str, str)]) -> (str, str):
+def selectStrategy(fitnessLst: List[float], stratLst: List[Dna]) -> Dna:
     """selects a strategy from a list of strategies with probability proportional to its
      percent fitness value"""
     rand = random.random()
@@ -71,7 +54,7 @@ def selectStrategy(fitnessLst: [float], stratLst: [(str, str)]) -> (str, str):
     return stratLst[-1]
 
 
-def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, generations: int) -> (str, str):
+def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, generations: int) -> Dna:
     """Generates a strategy with given memory depth and node size by randomly generating a
     population of random strategies, playing them against each other for a given number of
     generations and assigning a fitness value for each. Subsequent generations are chosen by
@@ -111,13 +94,13 @@ def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, gen
 
         # select a new population with each strategy having a probability
         # proportional to its fitness
-        newStratLst: (str, str) = []
+        newStratLst: List[Dna] = []
         for i in range(len(stratLst)):
             newStratLst.append(selectStrategy(fitnessLst, stratLst))
 
         # recombine each member of the population with another
         i = 0
-        stratLst: (str, str) = []
+        stratLst: List[Dna] = []
         while i < len(newStratLst):
             newStrats = recombine(newStratLst[i][0], newStratLst[i + 1][0])
             stratLst.append((newStrats[0], newStratLst[i][1]))

@@ -40,6 +40,13 @@ def test_everything ():
     assert d ^ 12 == "CDCDC"
     assert d % 5 == "DCCCC"
 
+    assert Dna("D") > Dna("C")
+    assert Dna("D") >= Dna("D")
+    assert Dna("C") < Dna("D")
+    assert Dna("C") <= Dna("C")
+    assert Dna("D")<<1 == Dna("CD")
+    assert Dna("CD")>>1 == Dna("D")
+
     dc = Dna.from_all_cooperate(7)
     assert dc == "CCCCCCC"
     dd = Dna.from_all_defect(7)
@@ -59,9 +66,9 @@ def test_everything ():
     assert dr & dc == "CCCCCCCCC"
     assert dr | dd == "DDDDDDDDD"
 
-    d = Dna(2, 4)
-    d %= 1<<4
-    assert d == "CDCCC"
+    d = Dna(15, 4)
+    d %= 1<<3
+    assert d == "DDDC"
 
     print("All tests SUCCEEDED!")
     return    

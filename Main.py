@@ -1,6 +1,5 @@
 import random
-from Player import Player, decode_CD, initializePlayers
-from Generators import *
+from Player import Player
 from Play import playPrisonersDillema
 from Genetic import genetic
 from SearchAlgorithms import *
