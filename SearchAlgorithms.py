@@ -1,44 +1,23 @@
+from struct import unpack
+from typing import List
+from Dna import Dna
 from Player import Player
-from Generators import *
 from Heuristics import *
 from random import *
 import math
 
-def generateRandomStrategies(memDepth: int, nodeSize: int, n: int) -> [(str, str)]:
-    """ Generates n random strategies with given memory depth and node size."""
-    assert nodeSize == 2 or nodeSize == 4
+def generateRandomStrategies(memDepth: int, nodeSize: int, n: int) -> List[Dna]:
+    """Generates `n` random strategies with the given memory depth and node size"""
+    N :int = nodeSize ** memDepth + memDepth
+    return [Dna.from_random(N) for i in range(n)]
 
-    result: [(str, str)] = []
-    for i in range(n):
-        result.append((CD_Generator.random(nodeSize ** memDepth), CD_Generator.random(memDepth)))
-
-    return result
-
-
-def getSuccessors(strat: (str, str)) -> [(str, str)]:
+def getSuccessors(strat:Dna) -> List[Dna]:
     """ Returns the list of successors for a given strategy.
-        Successors of a strategy 's' are defined as the set of all strategies
-        that differ by exactly one 'bit' from 's'. """
-    successors: [(str, str)] = []
+        Successors of a strategy `strat` are defined as the set of all strategies
+        that differ by exactly one bit. Returned list will be of size `len(strat)`"""
+    return [strat^(1<<i) for i in range(len(strat))]
 
-    # flip one bit in init moves
-    for i in range(len(strat[0])):
-        if strat[0][i] == "C":
-            successors.append((strat[0][:i] + "D" + strat[0][i + 1:], strat[1]))
-        elif strat[0][i] == "D":
-            successors.append((strat[0][:i] + "C" + strat[0][i + 1:], strat[1]))
-
-    # flip one bit in init moves
-    for i in range(len(strat[1])):
-        if strat[1][i] == "C":
-            successors.append((strat[0], strat[1][:i] + "D" + strat[1][i + 1:]))
-        elif strat[1][i] == "D":
-            successors.append((strat[0], strat[1][:i] + "C" + strat[1][i + 1:]))
-
-    return successors
-
-
-def localBeam(memDepth: int, nodeSize: int, k: int) -> (str, str):
+def localBeam(memDepth: int, nodeSize: int, k: int) -> Dna:
     """TODO"""
     print("----Local Beam----")
     i = 0
@@ -51,30 +30,27 @@ def localBeam(memDepth: int, nodeSize: int, k: int) -> (str, str):
 
     while True:
         # finds the top performing strategy and its score
-        scoreLst = manyVersusMany(stratLst, opponents)
-        scoreLst, stratLst = zip(*sorted(zip(scoreLst, stratLst)))
+        scoreList = manyVersusMany(stratLst, opponents)
+        scoreList, stratLst = zip(*sorted(zip(scoreList, stratLst)))
         topStrat = stratLst[-1]
-        topScore = scoreLst[-1]
+        topScore = scoreList[-1]
 
         print("\ti:", i)
         print("\t\ttopScore:", topScore)
 
         # finds all the successors from the list of strategies
-        successors: (str, str) = []
-        for strat in stratLst:
-            successors += getSuccessors(strat)
-        successors = list(dict.fromkeys(successors))    # removes duplicate entries (not tested yet TODO)
-
+        successors = [s for S in stratLst for s in getSuccessors(S)]
+        successors = [_k for _k in dict.fromkeys(successors)] # removes duplicate entries (not tested yet TODO)
         print("\t\tlen(stratLst):", len(stratLst), "  | len(successors):", len(successors))
 
         # calculates the scores of all successors and sorts them by score
-        scoreLst = manyVersusMany(successors, opponents)
-        scoreLst, successors = zip(*sorted(zip(scoreLst, successors)))
+        scoreList = manyVersusMany(successors, opponents)
+        scoreList, successors = zip(*sorted(zip(scoreList, stratLst)))
 
-        print("\t\ttopSucScore:", scoreLst[-1])
+        print("\t\ttopSucScore:", scoreList[-1])
 
         # return highest preforming strat if no better strat is found in successors
-        if topScore >= scoreLst[-1]:
+        if topScore >= scoreList[-1]:
             return topStrat
 
         # repeat with the k highest performing successors
@@ -83,7 +59,7 @@ def localBeam(memDepth: int, nodeSize: int, k: int) -> (str, str):
         i += 1
 
 
-def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
+def hillClimb(memDepth: int, nodeSize: int) -> Dna:
     """TODO"""
     print("----Hill Climbing----")
     NUM_OPPONENTS = 50
@@ -104,7 +80,7 @@ def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
         successors.append(topStrat)
 
         # calculate the fitness value for each successor and the top strategy
-        scoreLst = manyVersusOne(("CCDD", "C"), successors)
+        scoreLst = manyVersusOne(Dna("CCDDC"), successors)
         topStratScore = scoreLst[-1]    # compare against topStrat's score from this iteration
         scoreLst, stratLst = zip(*sorted(zip(scoreLst, successors)))
 
@@ -125,7 +101,7 @@ def hillClimb(memDepth: int, nodeSize: int) -> (str, str):
         i += 1
 
 
-def simulatedAnnealing(memDepth: int, nodeSize: int) -> (str, str):
+def simulatedAnnealing(memDepth: int, nodeSize: int) -> Dna:
     """TODO"""
     print("----Simulated Annealing----")
     topStrat = generateRandomStrategies(memDepth, nodeSize, 1)[0]

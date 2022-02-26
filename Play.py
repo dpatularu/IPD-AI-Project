@@ -1,11 +1,11 @@
-from Player import Player, initializePlayers
+from Player import Player, initialize_players
 
 
 def playPrisonersDillema(p1:Player, p2:Player, rounds:int)->tuple:
     """Players `r` rounds of the game with players `p1` and `p2`.
         Returns the resulting score (p1Score, p2Score)"""
     outcomes = { "CC": "R","DC": "T","CD": "S","DD": "P" }
-    initializePlayers(p1, p2)
+    initialize_players(p1, p2)
     for r in range(rounds):
         roundOutcome = p1.getMove() + p2.getMove()
         result = outcomes[roundOutcome]
