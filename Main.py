@@ -19,14 +19,14 @@ def main():
     b = localBeam(memDepth, nodeSize, 10)
     print(b)
 
-    p1 = Player(len(b[1]), b[0], b[1])
-    p2 = Player(1)  # Strategy and Initial Moves default to random
+    p1 = Player.from_dna(b)
+    p2 = Player.from_dna(Dna.from_random(67))  # Strategy and Initial Moves default to random
     (p1s, p2s) = playPrisonersDillema(p1, p2, 1000)
     # Strategy and Initial Moves default to random("Player 1 ID:", p1.strategy, p1.initMoves)
-    print("Player 1 ID:", p1.strategy, p1.initMoves)
-    print("Player 2 ID:", p2.strategy, p2.initMoves)
-    print("Player 1 score:", p1.score)
-    print("Player 2 score:", p2.score)
+    print("Player 1 DNA:", p1)
+    print("Player 2 DNA:", p2)
+    print("Player 1 score:", p1s)
+    print("Player 2 score:", p2s)
     return
 
 

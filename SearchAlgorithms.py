@@ -45,7 +45,7 @@ def localBeam(memDepth: int, nodeSize: int, k: int) -> Dna:
 
         # calculates the scores of all successors and sorts them by score
         scoreList = manyVersusMany(successors, opponents)
-        scoreList, successors = unpack(sorted(zip(scoreList, successors)))
+        scoreList, successors = zip(*sorted(zip(scoreList, stratLst)))
 
         print("\t\ttopSucScore:", scoreList[-1])
 
