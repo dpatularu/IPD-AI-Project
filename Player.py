@@ -15,13 +15,13 @@ class Player:
     NODESIZE :int = len(OUTCOMESA)
     NODEDEPTH :int = NODESIZE.bit_length()-1 # log_2 (NODESIZE)
 
+    __slots__ = ['initMoves', 'strategy', 'curState', 'initialized', 'score']
     def __init__ (self, strategy:Dna, initialMoves:Dna):
         """Creates a player using the given strategy and initial moves"""
         self.initMoves :Dna = initialMoves
         self.strategy  :Dna = strategy
         if Player.NODESIZE**self.memDepth != self.stratSize: raise ValueError
         self.curState :int = 0 # Starts empty, needs initializing
-        self.stateMask :int = self.stratSize - 1 # To keep the curState small
         self.initialized :bool = False
         self.score :int = 0 # Player wants to maximize this
     
@@ -98,15 +98,14 @@ class Player:
         
     def updateHistory (self, outcome:str):
         """Updates the history with the result of last round"""
-        self.curState <<= Player.NODEDEPTH
-        self.curState = self.curState & self.stateMask | Player.OUTCOMESD[outcome]
+        self.curState = (self.curState << Player.NODEDEPTH | Player.OUTCOMESD[outcome]) % len(self.strategy)
 
     def __str__ (self):
         return str(self.strategy) + str(self.initMoves)
 
     def __eq__(self, o) -> bool:
         if isinstance(o, Player):
-            return  self.strategy==o.strategy and self.initMoves==o.initMoves and self.curState==o.curState
+            return self.strategy==o.strategy and self.initMoves==o.initMoves and self.curState==o.curState
         elif isinstance(o, Dna):
             return o == str(self)
         elif isinstance(o, str):
