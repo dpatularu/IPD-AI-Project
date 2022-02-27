@@ -15,6 +15,7 @@ class Dna:
     - And a value of 3 with a size of 4 would be "DDCC"
     """
 
+    __slots__ = ['_val', '_size']
     def __init__(self, x:int|str, size:int=0):
         """Creates a piece of DNA. You can either pass in an integer
         and a size or a string of Cs and Ds."""
@@ -27,9 +28,7 @@ class Dna:
         elif isinstance(x, int):
             self._val :int = x
             self._size :int = size if size>0 else x.bit_length()
-        else:
-            print("Invalid argument for x")
-            exit(-1)
+        else: raise ValueError(x)
         assert self._val < 1<<self._size, "Value of Dna must fit in the size"
 
     @property
