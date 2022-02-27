@@ -1,5 +1,6 @@
 
-from Player import *
+from src.Player import Player, initialize_players
+from src.Dna import Dna
 
 def test_everything ():
 
@@ -9,7 +10,6 @@ def test_everything ():
     assert p.initMoves == "C"
     assert p.stratSize == 4
     assert p.curState == 0
-    assert p.stateMask == 3
     assert p.score == 0
     assert p.initialized is False
     assert Player.calcStratSize(2) == 16

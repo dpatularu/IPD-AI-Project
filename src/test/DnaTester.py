@@ -1,5 +1,5 @@
 
-from Dna import *
+from src.Dna import *
 
 def test_everything ():
 
