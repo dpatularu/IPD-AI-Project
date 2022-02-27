@@ -6,16 +6,19 @@ from Heuristics import *
 from random import *
 import math
 
+
 def generateRandomStrategies(memDepth: int, nodeSize: int, n: int) -> List[Dna]:
     """Generates `n` random strategies with the given memory depth and node size"""
     N :int = nodeSize ** memDepth + memDepth
     return [Dna.from_random(N) for i in range(n)]
+
 
 def getSuccessors(strat:Dna) -> List[Dna]:
     """ Returns the list of successors for a given strategy.
         Successors of a strategy `strat` are defined as the set of all strategies
         that differ by exactly one bit. Returned list will be of size `len(strat)`"""
     return [strat^(1<<i) for i in range(len(strat))]
+
 
 def localBeam(memDepth: int, nodeSize: int, k: int) -> Dna:
     """TODO"""
@@ -40,12 +43,13 @@ def localBeam(memDepth: int, nodeSize: int, k: int) -> Dna:
 
         # finds all the successors from the list of strategies
         successors = [s for S in stratLst for s in getSuccessors(S)]
-        successors = [_k for _k in dict.fromkeys(successors)] # removes duplicate entries (not tested yet TODO)
+        successors = [_k for _k in dict.fromkeys(successors)]
+
         print("\t\tlen(stratLst):", len(stratLst), "  | len(successors):", len(successors))
 
         # calculates the scores of all successors and sorts them by score
         scoreList = manyVersusMany(successors, opponents)
-        scoreList, successors = zip(*sorted(zip(scoreList, stratLst)))
+        scoreList, successors = zip(*sorted(zip(scoreList, successors)))
 
         print("\t\ttopSucScore:", scoreList[-1])
 
