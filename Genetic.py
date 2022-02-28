@@ -3,10 +3,8 @@
 import random
 from typing import List, Tuple
 from Dna import Dna
-from Play import playPrisonersDillema
-from Player import Player
-from SearchAlgorithms import generateRandomStrategies
-from Heuristics import *
+from SearchAlgorithms import *
+from PDGame import *
     
 def createNewGeneration(fitnessLst: List[int], stratLst: List[Dna], numElite: int) -> Dna:
     newGeneration = []
@@ -14,16 +12,14 @@ def createNewGeneration(fitnessLst: List[int], stratLst: List[Dna], numElite: in
         newGeneration.append(stratLst[-(i+1)]) #Allows the best strategies to move on without alteration
     
     while len(newGeneration) < len(stratLst):
-        mates = random.choices(population=stratLst, weights=fitnessLst, k=2)
-        child1, child2 = recombine(mates[0], mates[1])
-        newGeneration.append(child1)
-        newGeneration.append(child2)
+        mates = random.choices(stratLst, fitnessLst, k=2)
+        child = recombine(mates[0], mates[1])[0]
+        newGeneration.append(child)
     return newGeneration
 
 def mutate(strat: Dna) -> Dna:
     """Changes 1 random element in a given strategy"""
     return strat ^ (1 << random.randint(0, len(strat)-1))
-
 
 def recombine(d1: Dna, d2: Dna) -> Tuple[Dna,Dna]:
     """Randomly crosses over two strategies and returns those results"""
@@ -35,7 +31,7 @@ def recombine(d1: Dna, d2: Dna) -> Tuple[Dna,Dna]:
     m2 :int = m1 ^ N
     return Dna(d1&m1|d2&m2, sz), Dna(d2&m1|d1&m2, sz)
 
-def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, generations: int) -> Dna:
+def genetic(memDepth: int, popSize: int, mutationRate: float, generations: int) -> Dna:
     """Generates a strategy with given memory depth and node size by randomly generating a
     population of random strategies, playing them against each other for a given number of
     generations and assigning a fitness value for each. Subsequent generations are chosen by
@@ -46,8 +42,6 @@ def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, gen
     ----------
     `memDepth` : int
         The memory depth of a strategy
-    `nodeSize` : int
-        The base value for encoding a strategy. Either 2 if {CD} or 4 if {RTSP}
     `popSize` : int
         The size of the population. Must be even to allow for valid crossover pairings.
     `mutationRate` : float
@@ -64,7 +58,7 @@ def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, gen
     assert popSize % 2 == 0
 
     # generate an initial population
-    stratLst = generateRandomStrategies(memDepth, nodeSize, popSize)
+    stratLst = generateRandomStrategies(memDepth, popSize)
 
     for g in range(generations):
         # sort the population by fitness
