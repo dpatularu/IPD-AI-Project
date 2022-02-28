@@ -1,4 +1,5 @@
 import random
+from App import App
 from PDGame import oneVersusMany
 from Player import Player
 from Genetic import genetic
@@ -21,10 +22,12 @@ def run_hillClimb_example():
 
 def main():
     random.seed()
-    
-    h = run_hillClimb_example()
 
-    print("Final DNA:", h)
+    app = App()
+    
+    # h = run_hillClimb_example()
+
+    # print("Final DNA:", h)
     # l = generateSamplePopulation(2, 50000)
     # s = oneVersusMany(Player.from_dna(g), l) / 64 / len(l)
     # print("Ave Score:", s)
