@@ -4,7 +4,18 @@ from Dna import Dna
 from Play import playPrisonersDillema
 from Player import Player
 from SearchAlgorithms import generateRandomStrategies
-
+from Heuristics import *
+    
+def createNewGeneration(fitnessLst: [int], stratLst: [Dna], numElite: int) -> Dna:
+    newGeneration = []
+    for i in range(0, numElite): 
+        newGeneration.append(stratLst[-(i+1)]) #Allows the best strategies to move on without alteration
+    
+    while len(newGeneration) < len(stratLst):
+        mates = random.choices(population=stratLst, weights=fitnessLst, k=2)
+        child = recombine(mates[0], mates[1])
+        newGeneration.append(child)
+    return newGeneration
 
 def mutate(strat: Dna) -> Dna:
     """changes 1 random element in a given strategy"""
@@ -14,45 +25,11 @@ def mutate(strat: Dna) -> Dna:
 def recombine(strat1: Dna, strat2: Dna) -> Dna:
     """crosses over two strategies"""
     assert len(strat1) == len(strat2)
-    i = random.randint(1, len(strat1) - 1)
-    return str(strat1)[:i] + str(strat2)[i:], str(strat2)[:i] + str(strat1)[i:]
-
-
-def fitness(strats: List[Dna]) -> List[float]:
-    """takes a list of strategy tuples and returns the percentage fitness value for each"""
-    NUM_ROUNDS = 64     # the number of consecutive rounds each strategy plays against every other strategy
-
-    total = 0
-    fitnessLst = [0.0] * len(strats)
-    for i in range(len(strats) - 1):
-        testSubject = Player.from_dna(strats[i])
-        for j in range(i + 1, len(strats)):
-            competition = Player.from_dna(strats[j])
-            (p1s, p2s) = playPrisonersDillema(testSubject, competition, NUM_ROUNDS)
-            fitnessLst[i] += p1s
-            fitnessLst[j] += p2s
-            total += p1s + p2s
-            testSubject.score = 0
-
-    for i in range(len(fitnessLst)):
-        fitnessLst[i] /= float(total)
-
-    return fitnessLst
-
-
-def selectStrategy(fitnessLst: List[float], stratLst: List[Dna]) -> Dna:
-    """selects a strategy from a list of strategies with probability proportional to its
-     percent fitness value"""
-    rand = random.random()
-
-    temp = 0
-    for i in range(len(fitnessLst) - 1):
-        if rand < fitnessLst[i] + temp:
-            return stratLst[i]
-        temp += fitnessLst[i]
-
-    return stratLst[-1]
-
+    if len(strat1) == 1: return random.choice([strat1, strat2]) 
+    i = random.randint(0, len(strat1)-1)
+    firstHalf = strat1[:i]
+    secondHalf = strat2[i:]
+    return firstHalf + secondHalf
 
 def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, generations: int) -> Dna:
     """Generates a strategy with given memory depth and node size by randomly generating a
@@ -86,26 +63,11 @@ def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, gen
     stratLst = generateRandomStrategies(memDepth, nodeSize, popSize)
 
     for g in range(generations):
-        print("Generation:", g + 1, "/", generations)
-
         # sort the population by fitness
-        fitnessLst = fitness(stratLst)
+        fitnessLst = manyVersusMany(stratLst, [Dna("CCDDC")])
         fitnessLst, stratLst = zip(*sorted(zip(fitnessLst, stratLst)))
 
-        # select a new population with each strategy having a probability
-        # proportional to its fitness
-        newStratLst: List[Dna] = []
-        for i in range(len(stratLst)):
-            newStratLst.append(selectStrategy(fitnessLst, stratLst))
-
-        # recombine each member of the population with another
-        i = 0
-        stratLst: List[Dna] = []
-        while i < len(newStratLst):
-            newStrats = recombine(newStratLst[i][0], newStratLst[i + 1][0])
-            stratLst.append((newStrats[0], newStratLst[i][1]))
-            stratLst.append((newStrats[1], newStratLst[i + 1][1]))
-            i = i + 2
+        stratLst = createNewGeneration(fitnessLst, stratLst, 2)
 
         # mutate the population
         for i in range(len(stratLst)):
@@ -119,6 +81,6 @@ def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, gen
                 stratLst[i] = (stratLst[i][0], mutate(stratLst[i][1]))
 
     # evaluate and return the highest performing strategy
-    fitnessLst = fitness(stratLst)
+    fitnessLst = manyVersusMany(stratLst, [Dna("CCDDC")])
     fitnessLst, stratLst = zip(*sorted(zip(fitnessLst, stratLst)))
     return stratLst[-1]

@@ -13,13 +13,13 @@ def main():
     popSize = 100
     mutationRate = 0.001
     generations = 10
-    # g = genetic(memDepth, nodeSize, popSize, mutationRate, generations)
+    g = genetic(memDepth, nodeSize, popSize, mutationRate, generations)
     # h = hillClimb(memDepth, nodeSize)
     # s = simulatedAnnealing(memDepth, nodeSize)
-    b = localBeam(memDepth, nodeSize, 10)
-    print(b)
+    #b = localBeam(memDepth, nodeSize, 10)
+    print(g)
 
-    p1 = Player.from_dna(b)
+    p1 = Player.from_dna(g)
     p2 = Player.from_dna(Dna.from_random(67))  # Strategy and Initial Moves default to random
     (p1s, p2s) = playPrisonersDillema(p1, p2, 1000)
     # Strategy and Initial Moves default to random("Player 1 ID:", p1.strategy, p1.initMoves)
