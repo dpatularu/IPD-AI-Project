@@ -36,12 +36,14 @@ def test_everything():
     l1 = [Dna("CCCCD"), Dna("CCCCC")]
     l2 = [Dna("DDDDC"), Dna("DDDDD")]
 
-    assert manyVersusOne(l1, p2, 1) == [PDGame.SUCKER, PDGame.SUCKER]
-    assert manyVersusMany(l1, l2) == [0, 0]
-    assert oneVersusMany(p1, l2, rounds=1) == 0
-
     assert PDGame.highestPossibleScore(10) == 50
     assert PDGame.lowestPossibleScore(1000) == 0
+
+    assert manyVersusOne(l1, p2, 1) == [PDGame.SUCKER, PDGame.SUCKER]
+    assert manyVersusMany(l1, l2) == [0, 0]
+    assert oneVersusMany(p1, l2, 1) == 0
+    assert oneVersusMany(p2, l1, rounds=1) == 10
+    assert battleRoyale(l1, rounds=10) == [60, 60]
 
     print("All tests SUCCEEDED!")
 

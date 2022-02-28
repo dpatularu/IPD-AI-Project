@@ -3,6 +3,7 @@
 from typing import List, Tuple
 from Dna import Dna
 from Player import Player, initialize_players
+from SearchAlgorithms import coalesce
 
 class PDGame:
     """Stores information about a game of Prisoner's Dilemma.
@@ -12,15 +13,16 @@ class PDGame:
     REWARD :int = 3
     PENALTY :int = 1
     SUCKER :int = 0
+    DEFAULT_ROUNDS :int = 64
 
     __slots__ = ['p1', 'p2', 'rounds', 'curRound']
-    def __init__(self, p1:Player, p2:Player, rounds:int=64):
+    def __init__(self, p1:Player, p2:Player, rounds:int=None):
         """Creates a game of Prisoner's Dilemma with the given players
-        for the given number of rounds."""
+        for the given number of rounds, defaults to DEFAULT_ROUNDS."""
         self.p1 :Player = p1
         self.p2 :Player = p2
         initialize_players(p1, p2)
-        self.rounds :int = rounds
+        self.rounds :int = coalesce(rounds, PDGame.DEFAULT_ROUNDS)
         self.curRound :int = 1
 
     def __iter__(self): return self
@@ -73,21 +75,33 @@ class PDGame:
         """Returns the lowest possible score a player can achieve given the number of `rounds`"""
         return min(cls.TEMPTATION, cls.SUCKER, cls.REWARD, cls.PENALTY) * rounds
 
-def oneVersusMany (p1:Player, l2 :List[Dna], *args, **kwargs)->int:
+def oneVersusMany (p1:Player, l2 :List[Dna], rounds:int=None)->int:
     """Makes the given player `p1` play against a list of DNAs `l2`.
     Returns the total score `p1` achieved from every opponent.
     Will use the given number of rounds if given or use the default."""
-    return sum((PDGame(p1, Player.from_dna(d2), *args, **kwargs)()[0] for d2 in l2))
+    return sum((PDGame(p1, Player.from_dna(d2), rounds)()[0] for d2 in l2))
 
-def manyVersusMany (l1:List[Dna], l2:List[Dna], *args, **kwargs)->List[int]:
+def manyVersusMany (l1:List[Dna], l2:List[Dna], rounds:int=None)->List[int]:
     """Makes the given list of DNAs `l1` play against the other given list `l2`.
     Returns a list of the total scores each player in `l1` scored from every opponent in `l2`.
     Will use the given number of rounds if given or use the default."""
-    return [oneVersusMany(Player.from_dna(d1), l2, *args, **kwargs) for d1 in l1]
+    return [oneVersusMany(Player.from_dna(d1), l2, rounds) for d1 in l1]
 
-def manyVersusOne (l1:List[Dna], p2:Player, *args, **kwargs)->List[int]:
+def manyVersusOne (l1:List[Dna], p2:Player, rounds:int=None)->List[int]:
     """Makes the given list of DNAs `l1` play against the a given player `p2`.
     Returns a list of the scores each player in `l1` scored against `p2`.
     Will use the given number rounds if given or use the default."""
-    return [PDGame(Player.from_dna(d1), p2, *args, **kwargs)()[0] for d1 in l1]
+    return [PDGame(Player.from_dna(d1), p2, rounds)()[0] for d1 in l1]
 
+def battleRoyale (l:List[Dna], rounds:int=None)->List[int]:
+    """Makes a list of DNAs play against eachother and returns the total scores of each player.
+    Will use the given number of rounds if given or use the default."""
+    # Play against self, once
+    r = [PDGame(Player.from_dna(d), Player.from_dna(d), rounds)()[0] for d in l]
+    # Play against eachother
+    for i in range(len(l)):
+        for j in range(i+1, len(l)):
+            p1s, p2s = PDGame(Player.from_dna(l[i]), Player.from_dna(l[j]), rounds)()
+            r[i] += p1s
+            r[j] += p2s
+    return r
