@@ -11,6 +11,7 @@ def coalesce(*arg): return next((a for a in arg if a is not None), None)
 def generateRandomStrategies(memDepth: int, n: int) -> List[Dna]:
     """Generates `n` random strategies with the given memory depth and node size"""
     N :int = Player.calcDnaSize(memDepth)
+    if n == 1: return Dna.from_random(N)
     return [Dna.from_random(N) for i in range(n)]
 
 def generateSamplePopulation(memDepth:int, pop:float|int)->List[Dna]:

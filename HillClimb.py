@@ -2,7 +2,7 @@
 from typing import Any
 from PDGame import battleRoyale
 from Player import Player
-from SearchAlgorithms import getNeighbors
+from SearchAlgorithms import *
 
 
 def hillClimb(memDepth: int) -> Any:
@@ -13,7 +13,7 @@ def hillClimb(memDepth: int) -> Any:
     """
     print("----Hill Climbing----")
 
-    topStrat = Player.from_random(memDepth)
+    topStrat = generateRandomStrategies(memDepth, 1)
     topStratScore = 0
 
     i = 0

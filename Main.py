@@ -2,6 +2,7 @@ import random
 from PDGame import oneVersusMany
 from Player import Player
 from Genetic import genetic
+from HillClimb import *
 from SearchAlgorithms import *
 
 def run_genetic_example():
@@ -14,19 +15,19 @@ def run_genetic_example():
     #b = localBeam(memDepth, nodeSize, 10)
     
 
-def run_hillclimb_example():
+def run_hillClimb_example():
     memDepth = 2
-    # h = hillClimb(memDepth, nodeSize)
+    return hillClimb(memDepth)
 
 def main():
     random.seed()
     
-    g = run_genetic_example()
+    h = run_hillClimb_example()
 
-    print("Final DNA:", g)
-    l = generateSamplePopulation(2, 50000)
-    s = oneVersusMany(Player.from_dna(g), l) / 64 / len(l)
-    print("Ave Score:", s)
+    print("Final DNA:", h)
+    # l = generateSamplePopulation(2, 50000)
+    # s = oneVersusMany(Player.from_dna(g), l) / 64 / len(l)
+    # print("Ave Score:", s)
 
     return
 
