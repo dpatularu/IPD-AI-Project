@@ -15,46 +15,54 @@ class Dna:
     - And a value of 3 with a size of 4 would be "DDCC"
     """
 
-    __slots__ = ['_val', '_size']
+    __slots__ = ['__val', '__size']
     def __init__(self, x:int|str, size:int=0):
         """Creates a piece of DNA. You can either pass in an integer
         and a size or a string of Cs and Ds."""
         if isinstance(x, str):
-            self._val :int = Dna.encode(x)
-            self._size :int = len(x)
+            self.__val :int = Dna.encode(x)
+            self.__size :int = len(x)
         elif isinstance(x, Dna):
-            self._val :int = x.val
-            self._size :int = x.size
+            self.__val :int = x.val
+            self.__size :int = x.size
         elif isinstance(x, int):
-            self._val :int = x
-            self._size :int = size if size>0 else x.bit_length()
+            self.__val :int = x
+            self.__size :int = size if size>0 else x.bit_length()
         else: raise ValueError(x)
-        self._val %= 1<<self._size # Make sure value fits within size
+        self.__val %= 1<<self.__size # Make sure value fits within size
 
     @property
     def val (self)->int:
-        return self._val
+        return self.__val
 
     @val.setter
     def val (self, v:int):
         if v<0: raise ValueError
-        self._val = v
-        self._size = max(self._size, v.bit_length())
+        self.__val = v
+        self.__size = max(self.__size, v.bit_length())
 
     @property
     def size (self)->int:
-        return self._size
+        return self.__size
 
     @size.setter
     def size (self, s:int):
         if s<0: raise ValueError
-        if s < self._size:
-            self._val &= (1<<s)-1
-        self._size = s
+        if s < self.__size:
+            self.__val &= (1<<s)-1
+        self.__size = s
 
+    @property
+    def str(self) -> str:
+        return Dna.decode(self.size, self.val)
+    @str.setter
+    def str(self, s:str):
+        self.__val = Dna.encode(s)
+        self.__size = len(s)
+    def __str__(self) -> str: return self.str
+    
     def __int__(self) -> int: return self.val
     def __len__(self) -> int: return self.size
-    def __str__(self) -> str: return Dna.decode(self.size, self.val)
     
     
     __default_sizing__ = [

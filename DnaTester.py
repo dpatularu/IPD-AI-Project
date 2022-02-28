@@ -17,11 +17,12 @@ def test_everything ():
     d = Dna(6, 5)
     assert int(d) == 6
     assert len(d) == 5
+    assert d.str == "CDDCC"
     assert str(d) == "CDDCC"
     assert d == Dna(6, 5)
     assert d == 6
     assert d == "CDDCC"
-
+    
     assert Dna("CDDCC") == d
     assert Dna(d) == d
     assert not Dna(6) == d
@@ -39,6 +40,9 @@ def test_everything ():
     assert d & 3 == "CDCCC"
     assert d ^ 12 == "CDCDC"
     assert d % 5 == "DCCCC"
+
+    f.str = "CCCCC"
+    assert str(f) == "CCCCC"
 
     assert Dna("D") > Dna("C")
     assert Dna("D") >= Dna("D")
