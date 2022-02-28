@@ -44,7 +44,7 @@ class Player:
     
     @stratSize.setter
     def stratSize (self, s:int):
-        if s < Player.NODESIZE or s%4!=0 or s.bit_length()%2!=1: raise ValueError
+        if s < Player.NODESIZE or s%Player.NODESIZE!=0: raise ValueError
         self.strategy.size = s
         self.initMoves.size = s.bit_length().bit_length()-1 # math.log can eat my ass
 

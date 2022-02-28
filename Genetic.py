@@ -1,5 +1,7 @@
+"""Contains functions for performing Genetic based algorithms"""
+
 import random
-from typing import List
+from typing import List, Tuple
 from Dna import Dna
 from Play import playPrisonersDillema
 from Player import Player
@@ -18,18 +20,19 @@ def createNewGeneration(fitnessLst: List[int], stratLst: List[Dna], numElite: in
     return newGeneration
 
 def mutate(strat: Dna) -> Dna:
-    """changes 1 random element in a given strategy"""
-    return strat ^ (1 << random.randint(0, strat.size-1))
+    """Changes 1 random element in a given strategy"""
+    return strat ^ (1 << random.randint(0, len(strat)-1))
 
 
-def recombine(strat1: Dna, strat2: Dna) -> Dna:
-    """crosses over two strategies"""
-    assert len(strat1) == len(strat2)
-    if len(strat1) == 1: return random.choice([strat1, strat2]) 
-    i = random.randint(0, len(strat1)-1)
-    firstHalf = strat1[:i]
-    secondHalf = strat2[i:]
-    return firstHalf + secondHalf
+def recombine(d1: Dna, d2: Dna) -> Tuple[Dna,Dna]:
+    """Randomly crosses over two strategies and returns those results"""
+    sz :int = len(d1)
+    assert sz == len(d2)
+    if sz < 3: return d2, d1
+    N :int = (1 << sz) - 1
+    m1 :int = random.randint(1, N-1)
+    m2 :int = m1 ^ N
+    return Dna(d1&m1|d2&m2, sz), Dna(d2&m1|d1&m2, sz)
 
 def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, generations: int) -> Dna:
     """Generates a strategy with given memory depth and node size by randomly generating a
