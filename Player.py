@@ -44,7 +44,7 @@ class Player:
     
     @stratSize.setter
     def stratSize (self, s:int):
-        if s < Player.NODESIZE or s%4!=0 or s.bit_length()%2!=1: raise ValueError
+        if s < Player.NODESIZE or s%Player.NODESIZE!=0: raise ValueError
         self.strategy.size = s
         self.initMoves.size = s.bit_length().bit_length()-1 # math.log can eat my ass
 
@@ -55,9 +55,10 @@ class Player:
 
     @staticmethod
     def __split__(d:Dna)->Tuple[Dna,Dna]:
-        s :int = 1<<(d.size.bit_length()-1)
-        S :str = str(d)
-        return (Dna(S[:s]), Dna(S[s:]))
+        b :int = (d.size.bit_length() - 1)//2 # Log4/2 of max value
+        s :int = 2<<b # Splitting index
+        assert len(d) - s - b == 0, "Given DNA wouldn't split up nicely becuase of its size"
+        return Dna(d.val, s), Dna(d.val, b)
 
     @staticmethod
     def __combine__(d1:Dna, d2:Dna)->Dna:
@@ -76,8 +77,7 @@ class Player:
         """Constructs a player using the given Dna `d`.
         The Dna object is appropriately split into a strategy and initial move(s). Check Dna for more info.
         """
-        (d1, d2) = Player.__split__(d)
-        return cls(d1, d2)
+        return cls(*Player.__split__(d))
 
     @classmethod
     def from_id (cls, memoryDepth:int, id:int):
@@ -128,6 +128,8 @@ def initialize_players (p1:Player, p2:Player):
     p1.score = 0
     p2.score = 0
     M = max(p1.memDepth, p2.memDepth)
+    p1.initialized = True
+    p2.initialized = True
     for m in range(M):
         p1m = ("D" if p1.initMoves[m] else "C") if m < p1.memDepth else p1.getMove()
         p2m = ("D" if p2.initMoves[m] else "C") if m < p2.memDepth else p2.getMove()        
@@ -145,5 +147,3 @@ def initialize_players (p1:Player, p2:Player):
             p1.updateHistory("P")
             p2.updateHistory("P")
         else: raise ValueError
-    p1.initialized = True
-    p2.initialized = True

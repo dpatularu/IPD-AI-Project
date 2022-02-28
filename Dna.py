@@ -29,7 +29,7 @@ class Dna:
             self._val :int = x
             self._size :int = size if size>0 else x.bit_length()
         else: raise ValueError(x)
-        assert self._val < 1<<self._size, "Value of Dna must fit in the size"
+        self._val %= 1<<self._size # Make sure value fits within size
 
     @property
     def val (self)->int:

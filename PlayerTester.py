@@ -9,7 +9,6 @@ def test_everything ():
     assert p.initMoves == "C"
     assert p.stratSize == 4
     assert p.curState == 0
-    assert p.stateMask == 3
     assert p.score == 0
     assert p.initialized is False
     assert Player.calcStratSize(2) == 16
@@ -26,7 +25,10 @@ def test_everything ():
     assert p == "DDDDD"
     p = Player.from_id(1, 2)
     assert p == "CDCCC"
-    del p
+
+    try: p = Player.from_dna(Dna("CCCCCCC"))
+    except AssertionError: pass
+    else: raise AssertionError("Failed to error on bad DNA")
 
     p1 = Player.from_str("CCCC", "D")
     p2 = Player.from_str("DDDD", "C")
