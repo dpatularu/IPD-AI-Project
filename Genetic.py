@@ -6,7 +6,7 @@ from Player import Player
 from SearchAlgorithms import generateRandomStrategies
 from Heuristics import *
     
-def createNewGeneration(fitnessLst: [int], stratLst: [Dna], numElite: int) -> Dna:
+def createNewGeneration(fitnessLst: List[int], stratLst: List[Dna], numElite: int) -> Dna:
     newGeneration = []
     for i in range(0, numElite): 
         newGeneration.append(stratLst[-(i+1)]) #Allows the best strategies to move on without alteration

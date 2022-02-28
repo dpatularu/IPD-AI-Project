@@ -128,6 +128,8 @@ def initialize_players (p1:Player, p2:Player):
     p1.score = 0
     p2.score = 0
     M = max(p1.memDepth, p2.memDepth)
+    p1.initialized = True
+    p2.initialized = True
     for m in range(M):
         p1m = ("D" if p1.initMoves[m] else "C") if m < p1.memDepth else p1.getMove()
         p2m = ("D" if p2.initMoves[m] else "C") if m < p2.memDepth else p2.getMove()        
@@ -145,5 +147,3 @@ def initialize_players (p1:Player, p2:Player):
             p1.updateHistory("P")
             p2.updateHistory("P")
         else: raise ValueError
-    p1.initialized = True
-    p2.initialized = True
