@@ -52,13 +52,18 @@ class Player:
     def calcStratSize (cls, memDepth:int)->int:
         """Returns the number of bits needed to store a strategy with memory depth `memDepth`"""
         return cls.NODESIZE**memDepth
+    
+    @classmethod
+    def calcDnaSize (cls, memDepth:int)->int:
+        """Returns the number of bits needed to store the DNA of a player with memory depth `memDepth`"""
+        return cls.calcStratSize(memDepth) + memDepth
 
     @staticmethod
     def __split__(d:Dna)->Tuple[Dna,Dna]:
-        b :int = (d.size.bit_length() - 1)//2 # Log4/2 of max value
-        s :int = 2<<b # Splitting index
-        assert len(d) - s - b == 0, "Given DNA wouldn't split up nicely becuase of its size"
-        return Dna(d.val, s), Dna(d.val, b)
+        b :int = d.size.bit_length() - 1 # Log4 of max value
+        s :int = 1<<b # Splitting index
+        assert len(d) - s - b//2 == 0, "Given DNA wouldn't split up nicely becuase of its size"
+        return Dna(d.val, s), Dna(d.val, b//2)
 
     @staticmethod
     def __combine__(d1:Dna, d2:Dna)->Dna:
@@ -89,6 +94,11 @@ class Player:
         strategy of 'DCCC' and initMove of 'D'."""
         (d1, d2) = Player.__split__(Dna(id, cls.calcStratSize(memoryDepth)+memoryDepth))
         return cls(d1, d2)
+
+    @classmethod
+    def from_random (cls, memoryDepth:int):
+        """Creates a random Player using `memoryDepth`"""
+        return cls.from_dna(Dna.from_random(cls.calcDnaSize(memoryDepth)))
 
     def getMove (self)->str:
         """Returns whether this player would C or D for the current history and strategy"""
