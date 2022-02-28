@@ -8,11 +8,11 @@ from SearchAlgorithms import *
 def main():
     # random.seed()
 
-    memDepth = 3
+    memDepth = 2
     nodeSize = 4
     popSize = 100
-    mutationRate = 0.001
-    generations = 10
+    mutationRate = 0.5
+    generations = 100
     g = genetic(memDepth, nodeSize, popSize, mutationRate, generations)
     # h = hillClimb(memDepth, nodeSize)
     # s = simulatedAnnealing(memDepth, nodeSize)

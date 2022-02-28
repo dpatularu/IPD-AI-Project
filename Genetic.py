@@ -15,8 +15,9 @@ def createNewGeneration(fitnessLst: List[int], stratLst: List[Dna], numElite: in
     
     while len(newGeneration) < len(stratLst):
         mates = random.choices(population=stratLst, weights=fitnessLst, k=2)
-        child = recombine(mates[0], mates[1])
-        newGeneration.append(child)
+        child1, child2 = recombine(mates[0], mates[1])
+        newGeneration.append(child1)
+        newGeneration.append(child2)
     return newGeneration
 
 def mutate(strat: Dna) -> Dna:
@@ -72,16 +73,8 @@ def genetic(memDepth: int, nodeSize: int, popSize: int, mutationRate: float, gen
 
         stratLst = createNewGeneration(fitnessLst, stratLst, 2)
 
-        # mutate the population
-        for i in range(len(stratLst)):
-            # chance to mutate strategy
-            rand = random.random()
-            if rand < mutationRate:
-                stratLst[i] = (mutate(stratLst[i][0]), stratLst[i][1])
-            # chance to mutate initial moves independent of strategy
-            rand = random.random()
-            if rand < mutationRate:
-                stratLst[i] = (stratLst[i][0], mutate(stratLst[i][1]))
+        # Mutate a random number of strats based off the `mutationRate`
+        stratLst = [mutate(s) if random.random() < mutationRate else s for s in stratLst]
 
     # evaluate and return the highest performing strategy
     fitnessLst = manyVersusMany(stratLst, [Dna("CCDDC")])
