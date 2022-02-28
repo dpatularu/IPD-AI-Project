@@ -55,9 +55,10 @@ class Player:
 
     @staticmethod
     def __split__(d:Dna)->Tuple[Dna,Dna]:
-        s :int = 1<<(d.size.bit_length()-1)
-        S :str = str(d)
-        return (Dna(S[:s]), Dna(S[s:]))
+        b :int = (d.size.bit_length() - 1)//2 # Log4/2 of max value
+        s :int = 2<<b # Splitting index
+        assert len(d) - s - b == 0, "Given DNA wouldn't split up nicely becuase of its size"
+        return Dna(d.val, s), Dna(d.val, b)
 
     @staticmethod
     def __combine__(d1:Dna, d2:Dna)->Dna:
@@ -76,8 +77,7 @@ class Player:
         """Constructs a player using the given Dna `d`.
         The Dna object is appropriately split into a strategy and initial move(s). Check Dna for more info.
         """
-        (d1, d2) = Player.__split__(d)
-        return cls(d1, d2)
+        return cls(*Player.__split__(d))
 
     @classmethod
     def from_id (cls, memoryDepth:int, id:int):
