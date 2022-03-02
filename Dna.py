@@ -161,18 +161,3 @@ class Dna:
                 result |= step
             step <<= 1
         return result
-
-    @classmethod
-    def from_random (cls, size:int)->object:
-        """Random string of length `size` of Cooperate or Defect, (C or D)"""
-        return cls(random.randint(0, 1<<size-1), size)
-    
-    @classmethod
-    def from_all_cooperate (cls, size:int)->object:
-        """String of length `size` of all `C`s"""
-        return cls(0, size)
-    
-    @classmethod
-    def from_all_defect (cls, size:int)->object:
-        """String of length `size` of all `D`s"""
-        return cls((1<<size)-1, size)

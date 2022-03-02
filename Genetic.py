@@ -3,6 +3,7 @@
 import random
 from typing import List, Tuple
 from Dna import Dna
+from Generators import GenDna
 from SearchAlgorithms import *
 from PDGame import *
     
@@ -58,7 +59,7 @@ def genetic(memDepth: int, popSize: int, mutationRate: float, generations: int) 
     assert popSize % 2 == 0
 
     # generate an initial population
-    stratLst = generateRandomStrategies(memDepth, popSize)
+    stratLst = GenDna.random_list(popSize, memDepth)
 
     for g in range(generations):
         # sort the population by fitness

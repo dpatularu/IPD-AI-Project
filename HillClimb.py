@@ -2,10 +2,11 @@
 from typing import Any
 from PDGame import battleRoyale
 from Player import Player
-from SearchAlgorithms import *
+from SearchAlgorithms import getNeighbors
+from Generators import GenDna
 
 
-def hillClimb(memDepth: int) -> Any:
+def hillClimb(memDepth: int, maxRounds:int) -> Any:
     """note two different ways to implement comparisons
     either compare against previous iteration's hiscore, or this iteration's highest score
     comparing against the current iterations high score gives a more meaningful result,
@@ -13,11 +14,10 @@ def hillClimb(memDepth: int) -> Any:
     """
     print("----Hill Climbing----")
 
-    topStrat = generateRandomStrategies(memDepth, 1)
+    topStrat = GenDna.random(memDepth)
     topStratScore = 0
 
-    i = 0
-    while True:
+    for i in range(maxRounds):
         print("\ti:", i, " | score:", topStratScore)
 
         # generate successors for our highest performing strategy
@@ -36,5 +36,3 @@ def hillClimb(memDepth: int) -> Any:
             return topStrat
         topStrat = stratLst[-1]
         topStratScore = scoreLst[-1]
-
-        i += 1

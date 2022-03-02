@@ -1,20 +1,22 @@
 
 from Dna import Dna
-from SearchAlgorithms import generateRandomStrategies, getNeighbors
+from SearchAlgorithms import getNeighbors
+from Generators import GenDna
 from PDGame import manyVersusMany
+from Player import Player
 
-def localBeam(memDepth: int, k: int) -> Dna:
+def localBeam(memDepth: int, k: int, maxRounds:int) -> Dna:
     """TODO"""
     print("----Local Beam----")
     i = 0
 
     # randomly generated opponents used for manyVsMany Heuristic
     NUM_OPPONENTS = 10
-    opponents = generateRandomStrategies(memDepth, NUM_OPPONENTS)
+    opponents = GenDna.random_list(NUM_OPPONENTS, memDepth)
 
-    stratLst = generateRandomStrategies(memDepth, k)
+    stratLst = GenDna.random_list(k, memDepth)
 
-    while True:
+    for i in range(maxRounds):
         # finds the top performing strategy and its score
         scoreList = manyVersusMany(stratLst, opponents)
         scoreList, stratLst = zip(*sorted(zip(scoreList, stratLst)))
@@ -42,5 +44,3 @@ def localBeam(memDepth: int, k: int) -> Dna:
 
         # repeat with the k highest performing successors
         stratLst = successors[-k:]
-
-        i += 1

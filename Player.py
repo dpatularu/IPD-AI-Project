@@ -95,11 +95,6 @@ class Player:
         (d1, d2) = Player.__split__(Dna(id, cls.calcStratSize(memoryDepth)+memoryDepth))
         return cls(d1, d2)
 
-    @classmethod
-    def from_random (cls, memoryDepth:int):
-        """Creates a random Player using `memoryDepth`"""
-        return cls.from_dna(Dna.from_random(cls.calcDnaSize(memoryDepth)))
-
     def getMove (self)->str:
         """Returns whether this player would C or D for the current history and strategy"""
         if not self.initialized:
