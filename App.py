@@ -49,11 +49,12 @@ class App:
         return 'red' if b else 'green'
 
     def drawPlayerDnaL (self, p:Player, x:int, y:int, w:int=0, h:int=0):
+        """Draw a player's DNA lengthwise, as a strip."""
         sm :int = len(p.strategy)
         im :int = len(p.initMoves)
         M :int = sm + im
         if w <= 0: w = 4*M
-        if h <= 0: h = 4            
+        if h <= 0: h = 4
         ix :float = w / M
         wd :int = min(w,h) // 40
         _x=x; _y=y; _X:float=_x+ix; _Y=y+h
@@ -65,13 +66,13 @@ class App:
             c :str = App.colour(p.initMoves[i])
             self.canvas.create_rectangle(_x, _y, int(_X), _Y, fill=c, width=wd, outline='white')
             _x = int(_X); _X += ix
-        
 
     def drawPlayerDnaS (self, p:Player, r:Rect):
         im :int = len(p.initMoves)
         sm_ :int = 2 ** im
         intervalx :float = r[2] / (sm_+1)
         intervaly :float = r[3] / sm_
+
 
 
         c :str = App.colour(p.strategy[0])
