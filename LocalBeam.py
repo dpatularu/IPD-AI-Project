@@ -5,6 +5,7 @@ from Generators import GenDna
 from PDGame import manyVersusMany
 from Player import Player
 
+
 def localBeam(memDepth: int, k: int, maxRounds:int) -> Dna:
     """TODO"""
     print("----Local Beam----")
