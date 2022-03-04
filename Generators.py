@@ -137,6 +137,14 @@ class GenDna:
         """ Returns grudger strategy.
             Cooperates until opponent defects, then only defects. """
         return Dna("CDDDC")
+    
+    def pavlov() -> Dna:
+        """ Cooperates if it and its opponent moved alike in previous move and defects if they moved differently. Starts cooperating"""
+        return Dna("CDDCC")
+
+    def susPavlov() -> Dna:
+        """ Cooperates if it and its opponent moved alike in previous move and defects if they moved differently. Starts defecting"""
+        return Dna("CDDCD")
 
     @staticmethod
     def allFromSize(memDepth: int, size: int = None) -> List[Dna]:
@@ -154,5 +162,7 @@ class GenDna:
             GenDna.grudger(),
             GenDna.allCoop(),
             GenDna.allDef(),
-            GenDna.twoTit4Tat()
+            GenDna.twoTit4Tat(),
+            GenDna.pavlov(),
+            GenDna.susPavlov()
         ]
