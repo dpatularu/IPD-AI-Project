@@ -12,6 +12,8 @@ def hillClimb(memDepth: int, rounds: int, heuristic: str) -> Dna:
         opponents = GenDna.allHandpicked()
     elif heuristic == "AMD1":
         opponents = GenDna.allFromSize(1)
+    elif heuristic == "RAN":
+        pass
     elif heuristic == "BR":
         pass
     else:
@@ -26,6 +28,8 @@ def hillClimb(memDepth: int, rounds: int, heuristic: str) -> Dna:
         successors.append(topStrat)
 
         # calculate the fitness value for each successor and the top strategy
+        if heuristic == "RAN":
+            opponents = GenDna.randomLst(100, 3)
         if heuristic == "BR":
             scoreLst = battleRoyale(successors, rounds)
         else:

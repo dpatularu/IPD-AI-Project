@@ -15,6 +15,8 @@ def simulatedAnnealing(memDepth: int, rounds: int, heuristic: str) -> Dna:
         opponents = GenDna.allHandpicked()
     elif heuristic == "AMD1":
         opponents = GenDna.allFromSize(1)
+    elif heuristic == "RAN":
+        pass
     elif heuristic == "BR":
         pass
     else:
@@ -32,6 +34,8 @@ def simulatedAnnealing(memDepth: int, rounds: int, heuristic: str) -> Dna:
         successors = getNeighbors(topStrat)
         successors.append(topStrat)
 
+        if heuristic == "RAN":
+            opponents = GenDna.randomLst(100, 3)
         if heuristic == "BR":
             scoreLst = battleRoyale(successors, rounds)
         else:

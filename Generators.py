@@ -99,7 +99,7 @@ class GenDna:
         return [GenDna.random(memDepth, size) for i in range(n)]
 
     @staticmethod
-    def genRandom(n: int, memDepth: int, size: int = None) -> List[Dna]:
+    def genRandom(n: int, memDepth: int, size: int = None):
         """Returns a generator for random DNAs of `size` or `memDepth`"""
         return (GenDna.random(memDepth, size) for i in range(n))
 

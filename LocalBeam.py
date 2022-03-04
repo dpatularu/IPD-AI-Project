@@ -13,6 +13,8 @@ def localBeam(memDepth: int, rounds: int, heuristic: str, k: int) -> Dna:
         opponents = GenDna.allHandpicked()
     elif heuristic == "AMD1":
         opponents = GenDna.allFromSize(1)
+    elif heuristic == "RAN":
+        pass
     elif heuristic == "BR":
         pass
     else:
@@ -33,6 +35,8 @@ def localBeam(memDepth: int, rounds: int, heuristic: str, k: int) -> Dna:
         successors = [_k for _k in dict.fromkeys(successors)]
 
         # calculates the scores of all successors and sorts them by score
+        if heuristic == "RAN":
+            opponents = GenDna.randomLst(100, 3)
         if heuristic == "BR":
             scoreList = battleRoyale(successors, rounds)
         else:

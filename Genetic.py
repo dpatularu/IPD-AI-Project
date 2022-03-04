@@ -66,6 +66,8 @@ def genetic(memDepth: int, rounds: int, heuristic: str, popSize: int,
         opponents = GenDna.allHandpicked()
     elif heuristic == "AMD1":
         opponents = GenDna.allFromSize(1)
+    elif heuristic == "RAN":
+        pass
     elif heuristic == "BR":
         pass
     else:
@@ -75,8 +77,10 @@ def genetic(memDepth: int, rounds: int, heuristic: str, popSize: int,
     # generate an initial population
     stratLst = GenDna.randomLst(popSize, memDepth)
 
-    for g in range(generations):
+    for g in tqdm(range(generations)):
         # sort the population by fitness
+        if heuristic == "RAN":
+            opponents = GenDna.randomLst(100, 3)
         if heuristic == "BR":
             fitnessLst = battleRoyale(stratLst, rounds)
         else:
