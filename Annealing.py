@@ -1,40 +1,38 @@
-
 from math import exp
 import random
 from Dna import Dna
 from PDGame import battleRoyale
 from Player import Player
-from SearchAlgorithms import generateRandomStrategies, getNeighbors
+from SearchAlgorithms import getNeighbors
+from Generators import GenDna
 
-def simulatedAnnealing(memDepth: int, population:int) -> Dna:
+
+def simulatedAnnealing(memDepth: int, population: int, maxRounds: int) -> Dna:
     """TODO"""
     print("----Simulated Annealing----")
-    topStrat = Player.from_random(memDepth)
-    opponents = generateRandomStrategies(memDepth, population)
+    topStrat = GenDna.random(memDepth)
+    opponents = GenDna.random_list(population, memDepth)
     print("initial string:", topStrat)
     topStratScore = 0
 
     temperature = 100
-    i = 1
-    while True:
+    for i in range(maxRounds):
         print("\ti:", i, " | strat:", topStrat, " | score:", topStratScore)
-        temperature = .95*temperature
+        temperature = .95 * temperature
         if temperature < 10: return topStrat
 
         successors = getNeighbors(topStrat)
         successors.append(topStrat)
         scoreLst = battleRoyale(successors)
-        topStratScore = scoreLst[-1]   
+        topStratScore = scoreLst[-1]
 
         nextIndex = random.randint(0, len(successors) - 2)
         delta = scoreLst[nextIndex] - topStratScore
 
         probabilityRoll = random.random()
-        epsilon = exp(delta/temperature)
+        epsilon = exp(delta / temperature)
         if delta > 0:
             topStrat = successors[nextIndex]
         else:
-             if probabilityRoll < epsilon:
+            if probabilityRoll < epsilon:
                 topStrat = successors[nextIndex]
-
-        i += 1

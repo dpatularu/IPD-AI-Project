@@ -10,67 +10,68 @@ from Dna import Dna
 
 
 class Player:
-    OUTCOMESA :list = ["R", "T", "S", "P"]
-    OUTCOMESD :dict = { v:k for k,v in enumerate(OUTCOMESA) } # factors as dictionary
-    NODESIZE :int = len(OUTCOMESA)
-    NODEDEPTH :int = NODESIZE.bit_length()-1 # log_2 (NODESIZE)
+    OUTCOMESA: list = ["R", "T", "S", "P"]
+    OUTCOMESD: dict = {v: k for k, v in enumerate(OUTCOMESA)}  # factors as dictionary
+    NODESIZE: int = len(OUTCOMESA)
+    NODEDEPTH: int = NODESIZE.bit_length() - 1  # log_2 (NODESIZE)
 
     __slots__ = ['initMoves', 'strategy', 'curState', 'initialized', 'score']
-    def __init__ (self, strategy:Dna, initialMoves:Dna):
+
+    def __init__(self, strategy: Dna, initialMoves: Dna):
         """Creates a player using the given strategy and initial moves"""
-        self.initMoves :Dna = initialMoves
-        self.strategy  :Dna = strategy
-        if Player.NODESIZE**self.memDepth != self.stratSize: raise ValueError
-        self.curState :int = 0 # Starts empty, needs initializing
-        self.initialized :bool = False
-        self.score :int = 0 # Player wants to maximize this
-    
+        self.initMoves: Dna = initialMoves
+        self.strategy: Dna = strategy
+        if Player.NODESIZE ** self.memDepth != self.stratSize: raise ValueError
+        self.curState: int = 0  # Starts empty, needs initializing
+        self.initialized: bool = False
+        self.score: int = 0  # Player wants to maximize this
+
     @property
-    def memDepth (self)->int:
+    def memDepth(self) -> int:
         """Returns the memory depth of this player"""
         return self.initMoves.size
-    
+
     @memDepth.setter
-    def memDepth (self, m:int):
+    def memDepth(self, m: int):
         """Sets the memory depth of this Player, fills """
         if m <= 0 or m > 12: raise ValueError
         self.initMoves.size = m
         self.strategy.size = Player.NODESIZE ** m
-    
+
     @property
-    def stratSize (self)->int:
+    def stratSize(self) -> int:
         """Returns the number of bits needed to store this Player's strategy"""
         return self.strategy.size
-    
+
     @stratSize.setter
-    def stratSize (self, s:int):
-        if s < Player.NODESIZE or s%Player.NODESIZE!=0: raise ValueError
+    def stratSize(self, s: int):
+        if s < Player.NODESIZE or s % Player.NODESIZE != 0: raise ValueError
         self.strategy.size = s
-        self.initMoves.size = s.bit_length().bit_length()-1 # math.log can eat my ass
+        self.initMoves.size = s.bit_length().bit_length() - 1  # math.log can eat my ass
 
     @classmethod
-    def calcStratSize (cls, memDepth:int)->int:
+    def calcStratSize(cls, memDepth: int) -> int:
         """Returns the number of bits needed to store a strategy with memory depth `memDepth`"""
-        return cls.NODESIZE**memDepth
-    
+        return cls.NODESIZE ** memDepth
+
     @classmethod
-    def calcDnaSize (cls, memDepth:int)->int:
+    def calcDnaSize(cls, memDepth: int) -> int:
         """Returns the number of bits needed to store the DNA of a player with memory depth `memDepth`"""
         return cls.calcStratSize(memDepth) + memDepth
 
     @staticmethod
-    def __split__(d:Dna)->Tuple[Dna,Dna]:
-        b :int = d.size.bit_length() - 1 # Log4 of max value
-        s :int = 1<<b # Splitting index
-        assert len(d) - s - b//2 == 0, "Given DNA wouldn't split up nicely becuase of its size"
-        return Dna(d.val, s), Dna(d.val, b//2)
+    def __split__(d: Dna) -> Tuple[Dna, Dna]:
+        b: int = d.size.bit_length() - 1  # Log4 of max value
+        s: int = 1 << b  # Splitting index
+        assert len(d) - s - b // 2 == 0, "Given DNA wouldn't split up nicely becuase of its size"
+        return Dna(d.val, s), Dna(d.val, b // 2)
 
     @staticmethod
-    def __combine__(d1:Dna, d2:Dna)->Dna:
-        return Dna(str(d1)+str(d2))
+    def __combine__(d1: Dna, d2: Dna) -> Dna:
+        return Dna(str(d1) + str(d2))
 
     @classmethod
-    def from_str (cls, strategy:str, initialMoves:str):
+    def from_str(cls, strategy: str, initialMoves: str):
         """Constructs a player using the two strings `strategy` and `initialMoves`.
 
         For example, ("DDDD", "C"), would construct a player who initially cooperates but always defects.
@@ -78,62 +79,59 @@ class Player:
         return cls(Dna(strategy), Dna(initialMoves))
 
     @classmethod
-    def from_dna (cls, d:Dna):
+    def from_dna(cls, d: Dna):
         """Constructs a player using the given Dna `d`.
         The Dna object is appropriately split into a strategy and initial move(s). Check Dna for more info.
         """
         return cls(*Player.__split__(d))
 
     @classmethod
-    def from_id (cls, memoryDepth:int, id:int):
+    def from_id(cls, memoryDepth: int, id: int):
         """Creates a Player using the given `memoryDepth` and `id`.
         
         `id` is an integer where each bit represents a C or D.
         
         For example, with a memDepth of 1, an id of 3 would be a
         strategy of 'DCCC' and initMove of 'D'."""
-        (d1, d2) = Player.__split__(Dna(id, cls.calcStratSize(memoryDepth)+memoryDepth))
+        (d1, d2) = Player.__split__(Dna(id, cls.calcStratSize(memoryDepth) + memoryDepth))
         return cls(d1, d2)
 
-    @classmethod
-    def from_random (cls, memoryDepth:int):
-        """Creates a random Player using `memoryDepth`"""
-        return cls.from_dna(Dna.from_random(cls.calcDnaSize(memoryDepth)))
-
-    def getMove (self)->str:
+    def getMove(self) -> str:
         """Returns whether this player would C or D for the current history and strategy"""
         if not self.initialized:
             raise Exception("Player not initialized yet")
         return "D" if self.strategy[self.curState] else "C"
-        
-    def updateHistory (self, outcome:str):
+
+    def updateHistory(self, outcome: str):
         """Updates the history with the result of last round"""
         self.curState = (self.curState << Player.NODEDEPTH | Player.OUTCOMESD[outcome]) % len(self.strategy)
 
-    def __str__ (self):
+    def __str__(self):
         return str(self.strategy) + str(self.initMoves)
 
     def __eq__(self, o) -> bool:
         if isinstance(o, Player):
-            return self.strategy==o.strategy and self.initMoves==o.initMoves and self.curState==o.curState
+            return self.strategy == o.strategy and self.initMoves == o.initMoves and self.curState == o.curState
         elif isinstance(o, Dna):
             return o == str(self)
         elif isinstance(o, str):
             return str(self) == o
         elif isinstance(o, int):
             return o == (self.strategy.val << self.initMoves.size) | self.initMoves.val
-        else: raise ValueError        
+        else:
+            raise ValueError
 
-    def curState_str (self)->str:
+    def curState_str(self) -> str:
         """String representation of this player's current state, or memory"""
-        s :int = self.curState
-        result :str = ""
+        s: int = self.curState
+        result: str = ""
         for i in range(self.memDepth):
-            result += Player.OUTCOMESA[s&3]
+            result += Player.OUTCOMESA[s & 3]
             s >>= 2
         return result
 
-def initialize_players (p1:Player, p2:Player):
+
+def initialize_players(p1: Player, p2: Player):
     """Prepopulate the history of both given players using their initial moves"""
     p1.score = 0
     p2.score = 0
@@ -142,7 +140,7 @@ def initialize_players (p1:Player, p2:Player):
     p2.initialized = True
     for m in range(M):
         p1m = ("D" if p1.initMoves[m] else "C") if m < p1.memDepth else p1.getMove()
-        p2m = ("D" if p2.initMoves[m] else "C") if m < p2.memDepth else p2.getMove()        
+        p2m = ("D" if p2.initMoves[m] else "C") if m < p2.memDepth else p2.getMove()
         result = p1m + p2m
         if result == "CC":
             p1.updateHistory("R")
@@ -156,4 +154,5 @@ def initialize_players (p1:Player, p2:Player):
         elif result == "DD":
             p1.updateHistory("P")
             p2.updateHistory("P")
-        else: raise ValueError
+        else:
+            raise ValueError
