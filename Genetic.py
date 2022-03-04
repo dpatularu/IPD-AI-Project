@@ -31,7 +31,7 @@ def recombine(d1: Dna, d2: Dna) -> Tuple[Dna, Dna]:
     if sz < 3:
         return d2, d1
     N: int = (1 << sz) - 1
-    m1: int = random.randint(1, N - 1)
+    m1: int = 1 << random.randint(0, sz-1)
     m2: int = m1 ^ N
     return Dna(d1 & m1 | d2 & m2, sz), Dna(d2 & m1 | d1 & m2, sz)
 
