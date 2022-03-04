@@ -6,7 +6,7 @@ from Generators import GenDna
 from PDGame import *
 
 
-def createNewGeneration(fitnessLst: List[int], stratLst: List[Dna], numElite: int) -> [Dna]:
+def createNewGeneration(fitnessLst: List[int], stratLst: List[Dna], numElite: int) -> List[Dna]:
     newGeneration = []
     for i in range(0, numElite):
         newGeneration.append(stratLst[-(i + 1)])  # Allows the best strategies to move on without alteration
@@ -80,7 +80,7 @@ def genetic(memDepth: int, rounds: int, heuristic: str, popSize: int,
         if heuristic == "BR":
             fitnessLst = battleRoyale(stratLst, rounds)
         else:
-            fitnessLst = manyVersusMany(stratLst, opponents)
+            fitnessLst = manyVersusMany(stratLst, opponents)[0]
         fitnessLst, stratLst = zip(*sorted(zip(fitnessLst, stratLst)))
 
         stratLst = createNewGeneration(fitnessLst, stratLst, numElite)
@@ -89,6 +89,6 @@ def genetic(memDepth: int, rounds: int, heuristic: str, popSize: int,
         stratLst = [mutate(s) if random.random() < mutationRate else s for s in stratLst]
 
     # evaluate and return the highest performing strategy
-    fitnessLst = manyVersusMany(stratLst, [Dna("CCDDC")])
+    fitnessLst = manyVersusMany(stratLst, [Dna("CCDDC")])[0]
     fitnessLst, stratLst = zip(*sorted(zip(fitnessLst, stratLst)))
     return stratLst[-1]

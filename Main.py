@@ -59,7 +59,7 @@ def compareData_OLD():
     pyplot.show()
 
 
-def runAlgo(algo: str, args: [], iterations: int, overwrite=False, noWrite=False) -> [Dna]:
+def runAlgo(algo: str, args: List, iterations: int, overwrite=False, noWrite=False) -> List[Dna]:
     """ Runs a local search algorithm a given number of times.
         Returns and logs the results. """
 
@@ -107,8 +107,8 @@ def runAlgo(algo: str, args: [], iterations: int, overwrite=False, noWrite=False
     return data
 
 
-def playStrats(algo1: str, args1: [], algo2: str, args2: [], iterations: int, rounds: int,
-               overwrite=False, noWrite=False) -> [[int]]:
+def playStrats(algo1: str, args1: List, algo2: str, args2: List, iterations: int, rounds: int,
+               overwrite=False, noWrite=False) -> List[List[int]]:
     """ Plays the results of two local search algorithms against each other.
         Returns and logs the results. """
     if algo1 not in VALID_ALGOS:
@@ -160,7 +160,7 @@ def playStrats(algo1: str, args1: [], algo2: str, args2: [], iterations: int, ro
     return scores1, scores2
 
 
-def compareScores(scores1: [int], label1: str, scores2: [int], label2: str):
+def compareScores(scores1: List[int], label1: str, scores2: List[int], label2: str):
     """ Describes and plots the scores of two strategies. """
     print(label1)
     print("\tavg:", statistics.mean(scores1))

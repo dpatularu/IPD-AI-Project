@@ -23,7 +23,7 @@ def localBeam(memDepth: int, rounds: int, heuristic: str, k: int) -> Dna:
 
     for i in range(MAX_ROUNDS):
         # finds the top performing strategy and its score
-        scoreList = manyVersusMany(stratLst, opponents)
+        scoreList = manyVersusMany(stratLst, opponents)[0]
         scoreList, stratLst = zip(*sorted(zip(scoreList, stratLst)))
         topStrat = stratLst[-1]
         topScore = scoreList[-1]
@@ -36,7 +36,7 @@ def localBeam(memDepth: int, rounds: int, heuristic: str, k: int) -> Dna:
         if heuristic == "BR":
             scoreList = battleRoyale(successors, rounds)
         else:
-            scoreList = manyVersusMany(successors, opponents, rounds)
+            scoreList = manyVersusMany(successors, opponents, rounds)[0]
         scoreList, successors = zip(*sorted(zip(scoreList, successors)))
 
         # return highest preforming strat if no better strat is found in successors

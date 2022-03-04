@@ -35,7 +35,7 @@ def simulatedAnnealing(memDepth: int, rounds: int, heuristic: str) -> Dna:
         if heuristic == "BR":
             scoreLst = battleRoyale(successors, rounds)
         else:
-            scoreLst = manyVersusMany(successors, opponents)
+            scoreLst = manyVersusMany(successors, opponents)[0]
         topStratScore = scoreLst[-1]
 
         nextIndex = random.randint(0, len(successors) - 2)
