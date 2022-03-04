@@ -33,7 +33,7 @@ def hillClimb(memDepth: int, rounds: int, heuristic: str) -> Dna:
         if heuristic == "BR":
             scoreLst = battleRoyale(successors, rounds)
         else:
-            scoreLst = manyVersusMany(successors, opponents, rounds)
+            scoreLst = manyVersusMany(successors, opponents, rounds)[0]
         topStratScore = scoreLst[-1]  # compare against topStrat's score from this iteration
         scoreLst, stratLst = zip(*sorted(zip(scoreLst, successors)))
 
