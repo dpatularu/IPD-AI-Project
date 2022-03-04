@@ -10,7 +10,7 @@ class GenPlayer:
     @staticmethod
     def random(memoryDepth: int):
         """Creates a random Player using `memoryDepth`"""
-        return Player.from_dna(GenDna.random(Player.calcDnaSize(memoryDepth)))
+        return Player.from_dna(GenDna.random(memoryDepth))
 
     @staticmethod
     def tit4Tat(memDepth: int) -> Player:
