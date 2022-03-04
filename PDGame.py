@@ -4,6 +4,7 @@ from typing import List, Tuple, Generator
 from Dna import Dna
 from Player import Player, initialize_players
 from SearchAlgorithms import coalesce
+from tqdm import tqdm
 
 
 class PDGame:
@@ -89,7 +90,7 @@ def oneVersusMany(p1: Player, l2: List[Dna], rounds: int = None) -> int:
     return sum((PDGame(p1, Player.from_dna(d2), rounds)()[0] for d2 in l2))
 
 
-def manyVersusMany(l1: List[Dna], l2: List[Dna], rounds: int = None) -> Tuple[List[int],List[int]]: # Generator[Tuple[int,int], Tuple[int,int], Tuple[List[int],List[int]]]
+def manyVersusMany(l1: List[Dna], l2: List[Dna], rounds: int = None, track=False) -> Tuple[List[int],List[int]]: # Generator[Tuple[int,int], Tuple[int,int], Tuple[List[int],List[int]]]
     """Makes the given list of DNAs `l1` play against the other given list `l2`.
     Will use the given number of rounds if given or use the default.
     
@@ -101,13 +102,22 @@ def manyVersusMany(l1: List[Dna], l2: List[Dna], rounds: int = None) -> Tuple[Li
     - Sends: Pair of indices of the DNAs to play against eachother
     """
     res = ([0]*len(l1), [0]*len(l2))
-    for i, d1 in enumerate(l1):
-        for j, d2 in enumerate(l2):
-            (p1s, p2s) = PDGame(Player.from_dna(d1), Player.from_dna(d2), rounds).playAll()
-            res[0][i] += p1s
-            res[1][j] += p2s
-            # (i, j) = yield p1s, p2s
+    if track:
+        for i, d1 in tqdm(enumerate(l1)):
+            for j, d2 in enumerate(l2):
+                (p1s, p2s) = PDGame(Player.from_dna(d1), Player.from_dna(d2), rounds).playAll()
+                res[0][i] += p1s
+                res[1][j] += p2s
+                # (i, j) = yield p1s, p2s
+    else:
+        for i, d1 in enumerate(l1):
+            for j, d2 in enumerate(l2):
+                (p1s, p2s) = PDGame(Player.from_dna(d1), Player.from_dna(d2), rounds).playAll()
+                res[0][i] += p1s
+                res[1][j] += p2s
+                # (i, j) = yield p1s, p2s
     return res
+
 
 def manyVersusOne(l1: List[Dna], p2: Player, rounds: int = None) -> List[int]:
     """Makes the given list of DNAs `l1` play against the a given player `p2`.

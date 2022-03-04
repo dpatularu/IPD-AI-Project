@@ -4,6 +4,7 @@ import random
 from Dna import Dna
 from Generators import GenDna
 from PDGame import *
+from tqdm import tqdm
 
 
 def createNewGeneration(fitnessLst: List[int], stratLst: List[Dna], numElite: int) -> List[Dna]:

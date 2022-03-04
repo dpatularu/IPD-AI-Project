@@ -110,8 +110,9 @@ def playStrats(algo1: str, args1: [], algo2: str, args2: [], iterations: int, ro
         return data
 
     # make new or change manyVersusMany to return both results TODO
-    scores1 = manyVersusMany(strats1, strats2, rounds, track=True)
-    scores2 = manyVersusMany(strats2, strats1, rounds, track=True)
+    scores = manyVersusMany(strats1, strats2, rounds, track=True)
+    scores1 = scores[0]
+    scores2 = scores[1]
 
     writeFile = open(filePathOut, 'wb')
     pickle.dump([scores1, scores2], writeFile)
@@ -188,9 +189,9 @@ def main():
     heuristic = "AMD1"
     algo = "hillclimb"
 
-    print(runAlgo("genetic", [3, rounds, heuristic, popSize, mutationRate, generations, numElite], 1)[0])
-    print(runAlgo("genetic", [2, rounds, heuristic, popSize, mutationRate, generations, numElite], 1)[0])
-    print(runAlgo("genetic", [1, rounds, heuristic, popSize, mutationRate, generations, numElite], 10))
+    runAlgo("genetic", [3, rounds, heuristic, popSize, mutationRate, generations, numElite], 1)
+    runAlgo("genetic", [2, rounds, heuristic, popSize, mutationRate, generations, numElite], 1)
+    runAlgo("genetic", [1, rounds, heuristic, popSize, mutationRate, generations, numElite], 10)
 
     print(runAlgo("genetic", [memDepth, rounds, heuristic, popSize, mutationRate, generations, numElite], 1)[0])
 
