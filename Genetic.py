@@ -9,15 +9,25 @@ from tqdm import tqdm
 
 def createNewGeneration(fitnessLst: List[int], stratLst: List[Dna], numElite: int) -> List[Dna]:
     newGeneration = []
+    totalFitnessScore = sum(fitnessLst)
+    stratProbabilities = [fitness / totalFitnessScore for fitness in fitnessLst]
     for i in range(0, numElite):
         newGeneration.append(stratLst[-(i + 1)])  # Allows the best strategies to move on without alteration
 
     while len(newGeneration) < len(stratLst):
-        mates = random.choices(stratLst, fitnessLst, k=2)
+        mates = [selectOne(fitnessLst, stratLst) for i in range(2)]
         child = recombine(mates[0], mates[1])[0]
         newGeneration.append(child)
     return newGeneration
 
+def selectOne(fitnessLst: List[int], stratLst: List[Dna]):
+    totalFitnessScore = sum(fitnessLst)
+    pick = random.uniform(0, totalFitnessScore)
+    current = 0
+    for i in range(len(stratLst)):
+        current += fitnessLst[i]
+        if current > pick:
+            return stratLst[i]
 
 def mutate(strat: Dna) -> Dna:
     """ Changes one random element in a given strategy """
@@ -94,6 +104,11 @@ def genetic(memDepth: int, rounds: int, heuristic: str, popSize: int,
         stratLst = [mutate(s) if random.random() < mutationRate else s for s in stratLst]
 
     # evaluate and return the highest performing strategy
-    fitnessLst = manyVersusMany(stratLst, [Dna("CCDDC")])[0]
+    if heuristic == "RAN":
+        opponents = GenDna.randomLst(100, 3)
+    if heuristic == "BR":
+        fitnessLst = battleRoyale(stratLst, rounds)
+    else:
+        fitnessLst = manyVersusMany(stratLst, opponents)[0]
     fitnessLst, stratLst = zip(*sorted(zip(fitnessLst, stratLst)))
     return stratLst[-1]
