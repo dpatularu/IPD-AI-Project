@@ -4,21 +4,19 @@ import random
 from Dna import Dna
 from Generators import GenDna
 from PDGame import *
-from tqdm import tqdm
 
 
 def createNewGeneration(fitnessLst: List[int], stratLst: List[Dna], numElite: int) -> List[Dna]:
     newGeneration = []
-    totalFitnessScore = sum(fitnessLst)
-    stratProbabilities = [fitness / totalFitnessScore for fitness in fitnessLst]
     for i in range(0, numElite):
         newGeneration.append(stratLst[-(i + 1)])  # Allows the best strategies to move on without alteration
 
     while len(newGeneration) < len(stratLst):
-        mates = [selectOne(fitnessLst, stratLst) for i in range(2)]
+        mates = [selectOne(fitnessLst, stratLst) for _ in range(2)]
         child = recombine(mates[0], mates[1])[0]
         newGeneration.append(child)
     return newGeneration
+
 
 def selectOne(fitnessLst: List[int], stratLst: List[Dna]):
     totalFitnessScore = sum(fitnessLst)
@@ -28,6 +26,7 @@ def selectOne(fitnessLst: List[int], stratLst: List[Dna]):
         current += fitnessLst[i]
         if current > pick:
             return stratLst[i]
+
 
 def mutate(strat: Dna) -> Dna:
     """ Changes one random element in a given strategy """
@@ -88,7 +87,7 @@ def genetic(memDepth: int, rounds: int, heuristic: str, popSize: int,
     # generate an initial population
     stratLst = GenDna.randomLst(popSize, memDepth)
 
-    for g in tqdm(range(generations)):
+    for g in range(generations):
         # sort the population by fitness
         if heuristic == "RAN":
             opponents = GenDna.randomLst(100, 3)
