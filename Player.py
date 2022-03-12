@@ -6,23 +6,19 @@ Dna of a Player is strategy CONCAT initMoves
 """
 
 from typing import Tuple
-from Dna import Dna
+from Dna import Dna, Dna4
 
 
 class Player:
-    OUTCOMESA: list = ["R", "T", "S", "P"]
-    OUTCOMESD: dict = {v: k for k, v in enumerate(OUTCOMESA)}  # factors as dictionary
-    NODESIZE: int = len(OUTCOMESA)
-    NODEDEPTH: int = NODESIZE.bit_length() - 1  # log_2 (NODESIZE)
 
     __slots__ = ['initMoves', 'strategy', 'curState', 'initialized', 'score']
-
     def __init__(self, strategy: Dna, initialMoves: Dna):
         """Creates a player using the given strategy and initial moves"""
         self.initMoves: Dna = initialMoves
         self.strategy: Dna = strategy
-        if Player.NODESIZE ** self.memDepth != self.stratSize: raise ValueError
-        self.curState: int = 0  # Starts empty, needs initializing
+        if Player.calcStratSize(self.memDepth) != self.stratSize:
+            raise ValueError("Strat size and memory depth don't work together")
+        self.curState: Dna4 = Dna4(0, len(initialMoves)*2)  # Starts empty, needs initializing
         self.initialized: bool = False
         self.score: int = 0  # Player wants to maximize this
 
@@ -34,9 +30,9 @@ class Player:
     @memDepth.setter
     def memDepth(self, m: int):
         """Sets the memory depth of this Player, fills """
-        if m <= 0 or m > 12: raise ValueError
+        if m <= 0 or m > 12: raise ValueError("Bad memory depth, must be a small whole number")
         self.initMoves.size = m
-        self.strategy.size = Player.NODESIZE ** m
+        self.strategy.size = Dna4.NODESIZE ** m
 
     @property
     def stratSize(self) -> int:
@@ -45,14 +41,15 @@ class Player:
 
     @stratSize.setter
     def stratSize(self, s: int):
-        if s < Player.NODESIZE or s % Player.NODESIZE != 0: raise ValueError
+        if s < Dna4.NODESIZE or s % Dna4.NODESIZE != 0:
+            raise ValueError("Bad strat size, must be a power of", Dna4.NODESIZE)
         self.strategy.size = s
         self.initMoves.size = s.bit_length().bit_length() - 1  # math.log can eat my ass
 
     @classmethod
     def calcStratSize(cls, memDepth: int) -> int:
         """Returns the number of bits needed to store a strategy with memory depth `memDepth`"""
-        return cls.NODESIZE ** memDepth
+        return Dna4.NODESIZE ** memDepth
 
     @classmethod
     def calcDnaSize(cls, memDepth: int) -> int:
@@ -61,10 +58,10 @@ class Player:
 
     @staticmethod
     def __split__(d: Dna) -> Tuple[Dna, Dna]:
-        b: int = d.size.bit_length() - 1  # Log4 of max value
-        s: int = 1 << b  # Splitting index
-        assert len(d) - s - b // 2 == 0, "Given DNA wouldn't split up nicely becuase of its size"
-        return Dna(d.val, s), Dna(d.val, b // 2)
+        memDepth: int = (d.size.bit_length() - 1)//2  # Log4 of size
+        stratSize :int = Player.calcStratSize(memDepth)
+        assert len(d) - stratSize - memDepth == 0, "Given DNA wouldn't split up nicely becuase of its size"
+        return Dna(d.val>>memDepth, stratSize), Dna(d.val, memDepth)
 
     @staticmethod
     def __combine__(d1: Dna, d2: Dna) -> Dna:
@@ -93,43 +90,36 @@ class Player:
         
         For example, with a memDepth of 1, an id of 3 would be a
         strategy of 'DCCC' and initMove of 'D'."""
-        (d1, d2) = Player.__split__(Dna(id, cls.calcStratSize(memoryDepth) + memoryDepth))
-        return cls(d1, d2)
+        return cls(
+            Dna(id>>memoryDepth, cls.calcStratSize(memoryDepth)),
+            Dna(id, memoryDepth)
+        )
 
-    def getMove(self) -> str:
-        """Returns whether this player would C or D for the current history and strategy"""
-        if not self.initialized:
-            raise Exception("Player not initialized yet")
-        return "D" if self.strategy[self.curState] else "C"
+    def getMove(self) -> bool:
+        """Returns whether this player would defect or coopperate for the current history and strategy"""
+        if not self.initialized: raise Exception("Player not initialized yet")
+        return "D" if self.strategy[int(self.curState)] else "C"
 
     def updateHistory(self, outcome: str):
         """Updates the history with the result of last round"""
-        self.curState = (self.curState << Player.NODEDEPTH | Player.OUTCOMESD[outcome]) % len(self.strategy)
+        self.curState.val = (self.curState.val >> Dna4.NODEDEPTH) | (Dna4.ALPH_D[outcome] << (self.curState.size-Dna4.NODEDEPTH)) 
 
-    def __str__(self):
-        return str(self.strategy) + str(self.initMoves)
+    def __str__(self): return str(self.strategy) + str(self.initMoves)
+
+    def __int__(self): return (int(self.strategy) << self.initMoves.size) | int(self.initMoves)
 
     def __eq__(self, o) -> bool:
         if isinstance(o, Player):
-            return self.strategy == o.strategy and self.initMoves == o.initMoves and self.curState == o.curState
+            return self.strategy == o.strategy and self.initMoves == o.initMoves
         elif isinstance(o, Dna):
-            return o == str(self)
+            return int(self) == int(o)
         elif isinstance(o, str):
             return str(self) == o
         elif isinstance(o, int):
-            return o == (self.strategy.val << self.initMoves.size) | self.initMoves.val
-        else:
-            raise ValueError
+            return int(self) == o
+        else: raise TypeError("Cannot compare(==) against",type(o))
 
-    def curState_str(self) -> str:
-        """String representation of this player's current state, or memory"""
-        s: int = self.curState
-        result: str = ""
-        for i in range(self.memDepth):
-            result += Player.OUTCOMESA[s & 3]
-            s >>= 2
-        return result
-
+#================================================================================================================================
 
 def initialize_players(p1: Player, p2: Player):
     """Prepopulate the history of both given players using their initial moves"""
