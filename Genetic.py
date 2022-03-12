@@ -4,7 +4,6 @@ import random
 from Dna import Dna
 from Generators import GenDna
 from PDGame import *
-from tqdm import tqdm
 
 
 def createNewGeneration(fitnessLst: List[int], stratLst: List[Dna], numElite: int) -> List[Dna]:
@@ -13,10 +12,20 @@ def createNewGeneration(fitnessLst: List[int], stratLst: List[Dna], numElite: in
         newGeneration.append(stratLst[-(i + 1)])  # Allows the best strategies to move on without alteration
 
     while len(newGeneration) < len(stratLst):
-        mates = random.choices(stratLst, fitnessLst, k=2)
+        mates = [selectOne(fitnessLst, stratLst) for _ in range(2)]
         child = recombine(mates[0], mates[1])[0]
         newGeneration.append(child)
     return newGeneration
+
+
+def selectOne(fitnessLst: List[int], stratLst: List[Dna]):
+    totalFitnessScore = sum(fitnessLst)
+    pick = random.uniform(0, totalFitnessScore)
+    current = 0
+    for i in range(len(stratLst)):
+        current += fitnessLst[i]
+        if current > pick:
+            return stratLst[i]
 
 
 def mutate(strat: Dna) -> Dna:
@@ -78,7 +87,7 @@ def genetic(memDepth: int, rounds: int, heuristic: str, popSize: int,
     # generate an initial population
     stratLst = GenDna.randomLst(popSize, memDepth)
 
-    for g in tqdm(range(generations)):
+    for g in range(generations):
         # sort the population by fitness
         if heuristic == "RAN":
             opponents = GenDna.randomLst(100, 3)
@@ -94,6 +103,11 @@ def genetic(memDepth: int, rounds: int, heuristic: str, popSize: int,
         stratLst = [mutate(s) if random.random() < mutationRate else s for s in stratLst]
 
     # evaluate and return the highest performing strategy
-    fitnessLst = manyVersusMany(stratLst, [Dna("CCDDC")])[0]
+    if heuristic == "RAN":
+        opponents = GenDna.randomLst(100, 3)
+    if heuristic == "BR":
+        fitnessLst = battleRoyale(stratLst, rounds)
+    else:
+        fitnessLst = manyVersusMany(stratLst, opponents)[0]
     fitnessLst, stratLst = zip(*sorted(zip(fitnessLst, stratLst)))
     return stratLst[-1]

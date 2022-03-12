@@ -6,6 +6,7 @@ from Generators import *
 def hillClimb(memDepth: int, rounds: int, heuristic: str) -> Dna:
     """ Generates a strategy using a hill climbing approach. """
     MAX_ROUNDS = 1000
+    RAND_SIZE = 8
 
     opponents = []
     if heuristic == "HP":
@@ -29,7 +30,7 @@ def hillClimb(memDepth: int, rounds: int, heuristic: str) -> Dna:
 
         # calculate the fitness value for each successor and the top strategy
         if heuristic == "RAN":
-            opponents = GenDna.randomLst(100, 3)
+            opponents = GenDna.randomLst(RAND_SIZE, 3)
         if heuristic == "BR":
             scoreLst = battleRoyale(successors, rounds)
         else:
