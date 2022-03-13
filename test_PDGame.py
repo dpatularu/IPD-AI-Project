@@ -17,22 +17,30 @@ class PDGameTester (unittest.TestCase):
     def test_default (self):
         g :PDGame = PDGame(self.p1, self.p2, 4)
         self.assertEqual(g.curRound, 1)     # States , Moves
-        self.assertEqual(g.play(), "CD")    # DC=T / CD=S , C / D
+        np1, np2 = g.play() # DC=T / CD=S , C / D
+        self.assertIs(np1, self.p1)
+        self.assertIs(np2, self.p2)
+        self.assertEqual(np1.score, PDGame.SUCKER)
+        self.assertEqual(np2.score, PDGame.TEMPTATION)
         self.assertEqual(g.curRound, 2)
-        self.assertEqual(g.play(), "CC")    # CD=S / DC=T , C / C
+        g.play()    # CD=S / DC=T , C / C
         self.assertEqual(g.curRound, 3)
-        self.assertEqual(next(g), "DD")     # CC=R / CC=R , D / D
+        next(g)     # CC=R / CC=R , D / D
         self.assertEqual(g.curRound, 4)
-        self.assertEqual(g.play(), "CD")    # DD=P / DD=P , C / D
+        g.play()    # DD=P / DD=P , C / D
         self.assertEqual(g.curRound, 5)
         self.assertRaises(StopIteration, g.play)
-    
+
     def test_iterAll (self):
-        self.assertEqual(PDGame(self.p2, self.p1, 4).playAll(), (14, 4))
-        self.assertEqual(PDGame(self.p1, self.p2, 4)(), (4, 14))
-        for i, r in enumerate(PDGame(self.p1, self.p2, 4)):
+        np1, np2 = PDGame(self.p2, self.p1, 4).playAll()
+        self.assertEqual(np1.score, 14)
+        self.assertEqual(np2.score, 4)
+        np1, np2 = PDGame(self.p1, self.p2, 4)()
+        self.assertEqual(np1.score, 4)
+        self.assertEqual(np2.score, 14)
+        for i, (np1, np2) in enumerate(PDGame(self.p1, self.p2, 4)):
             with self.subTest(round=i):
-                self.assertEqual(r, ("CD", "CC", "DD", "CD")[i])
+                pass
         self.assertEqual(self.p1.score, 4)
         self.assertEqual(self.p2.score, 14)
 

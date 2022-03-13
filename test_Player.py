@@ -1,6 +1,7 @@
 
 import unittest
 from Dna import Dna
+from Node import CD, RSTP
 from Player import Player, initialize_players
 
 class Class_Functions (unittest.TestCase):
@@ -22,6 +23,9 @@ class Class_Functions (unittest.TestCase):
         (d1,d2) = Player.__split__(Dna("DCDCDCDCDCDCDCDCCC"))
         self.assertEqual(d1, "DCDCDCDCDCDCDCDC")
         self.assertEqual(d2, "CC")
+        (d1,d2) = Player.__split__(Dna(x=15, size=5)) # CDDDD
+        self.assertEqual(d1, "CDDD")
+        self.assertEqual(d2, "D")
 
     def test_combine (self):
         self.assertEqual(
@@ -75,27 +79,27 @@ class PlayerTester (unittest.TestCase):
         p1 = Player.from_str("CCCC", "D")
         p2 = Player.from_str("DDDD", "C")
         initialize_players(p1, p2)
-        self.assertEqual(p1.initMoves, "D")
-        self.assertEqual(p2.initMoves, "C")
+        self.assertEqual(p1.initMoves, CD.Defect)
+        self.assertEqual(p2.initMoves, CD.Cooperate)
         self.assertEqual(p1.curState, "T")
         self.assertEqual(p2.curState, "S")
         self.assertEqual(p1.score, 0)
         self.assertEqual(p2.score, 0)
-        self.assertEqual(p1.getMove(), "C")
-        self.assertEqual(p2.getMove(), "D")
-        p1.updateHistory("S")
-        p2.updateHistory("T")
+        self.assertEqual(p1.getMove(), CD.C)
+        self.assertEqual(p2.getMove(), CD.D)
+        p1.updateHistory(RSTP.Sucker)
+        p2.updateHistory(RSTP.Tempted)
         self.assertEqual(p1.curState, "S")
         self.assertEqual(p2.curState, "T")
-        self.assertEqual(p1.getMove(), "C")
-        self.assertEqual(p2.getMove(), "D")
+        self.assertEqual(p1.getMove(), CD.C)
+        self.assertEqual(p2.getMove(), CD.D)
         p1.score += 30
         p3 = Player.from_str("DDDDDDDDDDDDDDDD", "CC")
         initialize_players(p1, p3) # (p1,p2) = (D, C), (C, C) = (T,R), (S,R)
         self.assertEqual(p1.score, 0, "Score should've been reset")
         self.assertEqual(p1.curState, "R")
         self.assertEqual(p3.curState, "RS")
-        self.assertEqual(p1.getMove(), "C")
-        self.assertEqual(p3.getMove(), "D") 
+        self.assertEqual(p1.getMove(), CD.C)
+        self.assertEqual(p3.getMove(), CD.D) 
 
 if __name__=="__main__": unittest.main()    
